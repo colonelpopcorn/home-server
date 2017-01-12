@@ -1,0 +1,14 @@
+---
+  hosts: homeserver
+  vars:
+    plex_version: plexmediaserver_1.3.3.3148-b38628e_amd64.deb
+    home: {{ ansible_env.HOME }}
+  tasks:
+    - name: Get .dpkg for latest plex server.
+      get_url:
+        url: https://downloads.plex.tv/plex-media-server/1.3.3.3148-b38628e/{{ plex_version }}
+        dest: {{ home }}
+
+    - name: Install Plex server
+      apt:
+        deb: {{ home }}/{{ plex_version }}
