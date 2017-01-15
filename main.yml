@@ -1,0 +1,22 @@
+---
+- hosts: homeserver
+  remote_user: jonathan
+  become: yes
+  become_method: sudo
+  vars:
+    plex_version: plexmediaserver_1.3.3.3148-b38628e_amd64.deb
+  tasks:
+    - name: Install usbmount
+      apt:
+        name: usbmount
+        state: installed
+        update_cache: yes
+
+#    - name: make sure users have accounts
+#      user: name={{ item }}
+#      with_items:
+#        - abigail
+#        - christopher
+#        - daniel
+#        - keith
+#        - kelly
