@@ -9,12 +9,3 @@
         name: usbmount
         state: present
         update_cache: yes
-
-#    - name: make sure users have accounts
-#      user: name={{ item }}
-#      with_items:
-#        - abigail
-#        - christopher
-#        - daniel
-#        - keith
-#        - kelly

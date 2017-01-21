@@ -7,11 +7,20 @@
     - mongrelion.docker
   tasks:
 
-    - name: Copy shell script
+    - name: Copy shell script for transmission container
       copy:
         src: "{{ playbook_dir }}/docker-up.sh"
-        dest: "{{ ansible_env.HOME }}/docker-up.sh"
+        dest: "/home/jonathan/docker-up.sh"
         mode: 0755
 
-    - name: Run our docker container
-      script: "{{ ansible_env.HOME }}/docker-up.sh"
+    - name: Copy shell script for transmission proxy
+      copy:
+        src: "{{ playbook_dir }}/docker-proxy.sh"
+        dest: "/home/jonathan/docker-proxy.sh"
+        mode: 0755
+
+    - name: Run our docker container for transmission
+      script: "/home/jonathan/docker-up.sh"
+
+    - name: Run our docker container for a transmission proxy
+      script: "/home/jonathan/docker-up.sh"
