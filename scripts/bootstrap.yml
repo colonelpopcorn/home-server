@@ -1,0 +1,17 @@
+---
+-
+# Basic playbook to bootstrap docker
+
+  hosts: all
+  name: "Bootstrap docker onto master and workers"
+  roles:
+    - docker
+    - kubernetes
+  tasks:
+    #-
+    #  name: "Do something"
+    #  shell:
+    #    chdir: /somedir
+    #    cmd: "something fun --flag=1337"
+  vars:
+    docker_edition: 'ce'

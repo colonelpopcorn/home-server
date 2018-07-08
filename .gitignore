@@ -1,0 +1,6 @@
+.vagrant/
+*.retry
+*.log
+**/roles/
+scripts/hosts
+scripts/hosts.yml
