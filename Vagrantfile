@@ -11,6 +11,7 @@ Vagrant.configure("2") do |config|
     config.vm.define machine_name do |machine|
       machine.vm.box = "ubuntu/xenial64"
       machine.vm.hostname = machine_name
+      machine.vm.network "private_network", ip: "10.0.0.#{10+machine_id}"
       ssh_key = File.readlines("#{Dir.home}/.ssh/vagrant_machine_key").first.strip
       machine.vm.provision "shell" do |s|
         s.inline = <<-SHELL
@@ -36,7 +37,7 @@ Vagrant.configure("2") do |config|
             }
           }
           ansible.raw_arguments = [
-            "--private-key=/home/jonathan/.ssh/vagrant_machine_key"
+            "--private-key=#{Dir.home}/.ssh/vagrant_machine_key"
           ]
           ansible.galaxy_role_file = "scripts/requirements.yml"
           ansible.playbook = "scripts/bootstrap.yml"

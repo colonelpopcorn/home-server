@@ -15,3 +15,7 @@
     #    cmd: "something fun --flag=1337"
   vars:
     docker_edition: 'ce'
+    kubernetes_apiserver_advertise_address: '10.0.0.10'
+    kubernetes_enable_web_ui: True
+    kubernetes_allow_pods_on_master: True
+    kubernetes_debug: True
