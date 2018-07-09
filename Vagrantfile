@@ -11,10 +11,13 @@ Vagrant.configure("2") do |config|
     config.vm.define machine_name do |machine|
       machine.vm.box = "ubuntu/xenial64"
       machine.vm.hostname = machine_name
-      machine.vm.network :private_network, ip: "10.0.0.#{10+machine_id}"
+      ssh_key = File.readlines("#{Dir.home}/.ssh/vagrant_machine_key").first.strip
       machine.vm.provision "shell" do |s|
         s.inline = <<-SHELL
           sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install python2.7 -y && sudo ln -s /usr/bin/python2.7 /usr/bin/python
+          echo #{ssh_key} >> /home/vagrant/.ssh/id_rsa
+          chown vagrant /home/vagrant/.ssh/id_rsa
+          chmod 400 /home/vagrant/.ssh/id_rsa
         SHELL
       end
 
@@ -22,10 +25,21 @@ Vagrant.configure("2") do |config|
         machine.vm.provision :ansible do |ansible|
           ansible.limit = "all"
           ansible.become = true
-          ansible.verbose = "vvvv"
+          ansible.groups = {
+            "master" => ["kube-master"],
+            "workers" => ["kube-worker-1", "kube-worker-2"],
+            "master:vars" => {
+              "kubernetes_role" => "master"
+            },
+            "workers:vars" => {
+              "kubernetes_role" => "node"
+            }
+          }
+          ansible.raw_arguments = [
+            "--private-key=/home/jonathan/.ssh/vagrant_machine_key"
+          ]
           ansible.galaxy_role_file = "scripts/requirements.yml"
           ansible.playbook = "scripts/bootstrap.yml"
-          ansible.inventory_path = "scripts/hosts"
         end
       end
     end
