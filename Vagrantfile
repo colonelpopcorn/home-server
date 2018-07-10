@@ -4,9 +4,9 @@ Vagrant.configure("2") do |config|
   N = 2
   (0..N).each do |machine_id|
     if machine_id == 0
-      machine_name = "kube-master"
+      machine_name = "swarm-manager"
     else
-      machine_name = "kube-worker-#{machine_id}"
+      machine_name = "swarm-worker-#{machine_id}"
     end
     config.vm.define machine_name do |machine|
       machine.vm.box = "ubuntu/xenial64"
@@ -27,13 +27,13 @@ Vagrant.configure("2") do |config|
           ansible.limit = "all"
           ansible.become = true
           ansible.groups = {
-            "master" => ["kube-master"],
-            "workers" => ["kube-worker-1", "kube-worker-2"],
-            "master:vars" => {
-              "kubernetes_role" => "master"
+            "manager" => ["swarm-manager"],
+            "workers" => ["swarm-worker-1", "swarm-worker-2"],
+            "manager:vars" => {
+              "swarm_role" => "manager"
             },
             "workers:vars" => {
-              "kubernetes_role" => "node"
+              "swarm_role" => "worker"
             }
           }
           ansible.raw_arguments = [
