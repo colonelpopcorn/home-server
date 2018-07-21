@@ -1,0 +1,18 @@
+# Services to manage and run the cluster.
+version: '3'
+services:
+  traefik:
+    deploy:
+      constraints: [node.role == manager]
+  watchtower:
+    restart: always
+    image: v2tec/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 0 4 * * *" --cleanup
+    deploy:
+      constraints: [node.role == manager]
+
+  portainer:
+    deploy:
+        constraints: [node.role == manager]
