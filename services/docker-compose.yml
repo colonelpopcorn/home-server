@@ -19,7 +19,7 @@ services:
   portainer:
     image: portainer/portainer
     labels:
-      - "traefik.frontend.rule=Host:portainer.docker.localhost"
+      - "traefik.frontend.rule=Host:portainer.${DOMAIN_NAME}"
       - "traefik.portainer.port=9000"
     command: -H unix:///var/run/docker.sock
     volumes:
