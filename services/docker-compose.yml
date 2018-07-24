@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+
+  reverse-proxy:
+    image: traefik:latest # The official Traefik docker image
+    command: --api --docker # Enables the web UI and tells Træfik to listen to docker
+    ports:
+      - "80:80"     # The HTTP port
+      - "443:443"   # The HTTPS port
+      - "9876:8080" # The Web UI (enabled by --api)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+      - ${DOCKER_DIR}/traefik:/etc/traefik
+      - ${DOCKER_DIR}/shared:/shared
+    deploy:
+      constraints: [node.role == manager]
+
+  portainer:
+    image: portainer/portainer
+    labels:
+      - "traefik.frontend.rule=Host:portainer.docker.localhost"
+      - "traefik.portainer.port=9000"
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_DIR}/portainer:/data
+    deploy:
+      constraints: [node.role == manager]
+
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge
