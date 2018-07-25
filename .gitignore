@@ -4,3 +4,4 @@
 **/roles/
 scripts/hosts
 scripts/hosts.yml
+**/.env

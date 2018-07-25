@@ -9,24 +9,25 @@ services:
   traefik:
     hostname: traefik
     image: traefik:latest
+    command: --api --docker # Enables the web UI and tells Træfik to listen to docker
     container_name: traefik
     restart: always
-    DOMAIN_NAME: ${DOMAIN_NAME}
     networks:
       - default
       - traefik_proxy
     ports:
-      - "80:80"
-      - "443:443"
-#      - "XXXX:8080"
+      - "8080:80"
+      - "4430:443"
+      # - "80:80"
+      # - "443:443"
     environment:
       - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
       - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
+      - DOMAIN_NAME=${DOMAIN_NAME}
     labels:
       - "traefik.enable=true"
       - "traefik.backend=traefik"
       - "traefik.frontend.rule=Host:traefik.${DOMAIN_NAME}"
-#      - "traefik.frontend.rule=Host:${DOMAIN_NAME}; PathPrefixStrip: /traefik"
       - "traefik.port=8080"
       - "traefik.docker.network=traefik_proxy"
     volumes:
@@ -45,42 +46,20 @@ services:
     command: --templates http://templates/templates.json
     # ports:
     #   - "XXXX:9000"
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=portainer"
+      - "traefik.frontend.rule=Host:portainer.${DOMAIN_NAME}"
+      - "traefik.port=9000"
+      - "traefik.docker.network=traefik_proxy"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${DOCKER_DIR}/portainer/data:/data
       - ${DOCKER_DIR}/shared:/shared
     environment:
       - TZ=${TZ}
-
-# Organizer - Unified HTPC/Home Server Web Interface
-  organizr:
-    container_name: organizr
-    hostname: organizr
-    restart: always
-    image: lsiocommunity/organizr
-    volumes:
-      - ${DOCKER_DIR}/organizr:/config
-      - ${DOCKER_DIR}/shared:/shared
-    # ports:
-    #   - "XXXX:80"
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-
-# WebUI for MariaDB, need to find suitable replacement for PostgreSQL
-#  phpmyadmin:
-#    hostname: phpmyadmin
-#    container_name: phpmyadmin
-#    image: phpmyadmin/phpmyadmin
-#    restart: always
-#    links:
-#      - mariadb:db
-#    ports:
-#      - XXXX:80
-#    environment:
-#      - PMA_HOST=mariadb
-#      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
 
 ######### DOCKER RELATED ##########
 
@@ -93,30 +72,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --schedule "0 0 4 * * *" --cleanup
-
-######### SMART HOME APPS ##########
-
-# Home Assistant - Smart Home Hub
-#  homeassistant:
-#    container_name: homeassistant
-#    hostname: hass
-#    restart: always
-#    image: homeassistant/home-assistant
-#    devices:
-#      - /dev/ttyUSB0:/dev/ttyUSB0
-#      - /dev/ttyUSB1:/dev/ttyUSB1
-#      - /dev/ttyACM0:/dev/ttyACM0
-#    volumes:
-#      - ${DOCKER_DIR}/homeassistant:/config
-#      - /etc/localtime:/etc/localtime:ro
-#      - ${DOCKER_DIR}/shared:/shared
-#    ports:
-#      - "XXXX:8123"
-#    privileged: true
-#    environment:
-#      - PUID=${PUID}
-#      - PGID=${PGID}
-#      - TZ=${TZ}
 
 ######### DOWNLOADERS ##########
 
@@ -172,64 +127,6 @@ services:
       - TRANSMISSION_WATCH_DIR_ENABLED=true
       - TRANSMISSION_DOWNLOAD_DIR=/downloads/completed
 
-# qBittorrent without VPN – Bittorrent Downloader (Alternative)
-#  qbittorrent:
-#    image: "linuxserver/qbittorrent"
-#    hostname: qbittorrent
-#    container_name: "qbittorrent"
-#    volumes:
-#      - ${DOCKER_DIR}/qbittorrent:/config
-#      - ${DOCKER_DIR}/Downloads/completed:/downloads
-#      - ${DOCKER_DIR}/shared:/shared
-#    ports:
-#      - "XXXX:XXXX"
-#      - "6881:6881"
-#      - "6881:6881/udp"
-#    restart: always
-#    environment:
-#      - PUID=${PUID}
-#      - PGID=${PGID}
-#      - TZ=${TZ}
-#      - UMASK_SET=002
-#      - WEBUI_PORT=XXXX
-
-# SABnzbd – Usenet (NZB) Downloader
-  sabnzbd:
-    image: "linuxserver/sabnzbd"
-    hostname: sabnzbd
-    container_name: "sabnzbd"
-    volumes:
-      - ${DOCKER_DIR}/sabnzbd:/config
-      - ${DOCKER_DIR}/Downloads/completed:/downloads
-      - ${DOCKER_DIR}/Downloads/incomplete:/incomplete-downloads
-      - ${DOCKER_DIR}/shared:/shared
-    ports:
-        - "XXXX:8080"
-    restart: always
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-
-# NZBGet – Usenet (NZB) Downloader (Alternative)
-  nzbget:
-    image: "linuxserver/nzbget"
-    hostname: nzbget
-    container_name: "nzbget"
-    volumes:
-      - ${DOCKER_DIR}/sabnzbd:/config
-      - ${DOCKER_DIR}/Downloads:/downloads
-      - ${DOCKER_DIR}/Downloads/incomplete:/incomplete-downloads
-      - ${DOCKER_DIR}/shared:/shared
-    ports:
-      - "XXXX:6789"
-    restart: always
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-
-
 ######### PERSONAL VIDEO RECORDERS ##########
 
 # Radarr – Movie Download and Management
@@ -243,8 +140,6 @@ services:
       - ${DOCKER_DIR}/media/movies:/movies
       - "/etc/localtime:/etc/localtime:ro"
       - ${DOCKER_DIR}/shared:/shared
-    # ports:
-    #   - "XXXX:7878"
     restart: always
     environment:
       - PUID=${PUID}
@@ -300,8 +195,8 @@ services:
       - ${DOCKER_DIR}/media/music:/music
       - "/etc/localtime:/etc/localtime:ro"
       - ${DOCKER_DIR}/shared:/shared
-    ports:
-      - "XXXX:8686"
+    # ports:
+    #   - "XXXX:8686"
     restart: always
     environment:
       - PUID=${PUID}
@@ -367,8 +262,8 @@ services:
       - ${DOCKER_DIR}/tautulli/config:/config
       - ${DOCKER_DIR}/tautulli/logs:/logs:ro
       - ${DOCKER_DIR}/shared:/shared
-    ports:
-      - "XXXX:8181"
+    # ports:
+    #   - "XXXX:8181"
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -383,8 +278,8 @@ services:
     volumes:
       - ${DOCKER_DIR}/ombi:/config
       - ${DOCKER_DIR}/shared:/shared
-    ports:
-      - "XXXX:3579"
+    # ports:
+    #   - "XXXX:3579"
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -463,3 +358,9 @@ services:
 #    environment:
 #      - PUID=${PUID}
 #      - PGID=${PGID}
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge
