@@ -21,10 +21,13 @@ services:
     labels:
       - "traefik.frontend.rule=Host:portainer.${DOMAIN_NAME}"
       - "traefik.portainer.port=9000"
+      - "traefik.docker.network=traefik_proxy"
     command: -H unix:///var/run/docker.sock
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${DOCKER_DIR}/portainer:/data
+    networks:
+      - traefik_proxy
     deploy:
       constraints: [node.role == manager]
 
