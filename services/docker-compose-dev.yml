@@ -6,17 +6,33 @@ services:
 
 ######### MAIN PROXY - traefik ##########
 
-  reverse-proxy:
-      image: traefik:latest # The official Traefik docker image
-      command: --api --docker # Enables the web UI and tells Træfik to listen to docker
-      ports:
-        - "${TRAEFIK_HTTP_PORT}:80"     # The HTTP port
-        - "${TRAEFIK_HTTPS_PORT}:443"   # The HTTPS port
-        - "${TRAEFIK_UI_PORT}:8080" # The Web UI (enabled by --api)
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
-        - ${DOCKER_DIR}/traefik:/etc/traefik
-        - ${DOCKER_DIR}/shared:/shared
+  traefik:
+    hostname: traefik
+    image: traefik:latest
+    container_name: traefik
+    restart: always
+    DOMAIN_NAME: ${DOMAIN_NAME}
+    networks:
+      - default
+      - traefik_proxy
+    ports:
+      - "80:80"
+      - "443:443"
+#      - "XXXX:8080"
+    environment:
+      - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
+      - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=traefik"
+      - "traefik.frontend.rule=Host:traefik.${DOMAIN_NAME}"
+#      - "traefik.frontend.rule=Host:${DOMAIN_NAME}; PathPrefixStrip: /traefik"
+      - "traefik.port=8080"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${DOCKER_DIR}/traefik:/etc/traefik
+      - ${DOCKER_DIR}/shared:/shared
 
 ######### FRONTENDS ##########
 
