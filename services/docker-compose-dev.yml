@@ -7,11 +7,8 @@ services:
 ######### MAIN PROXY - traefik ##########
 
   traefik:
-    hostname: traefik
     image: traefik:latest
     command: --api --docker # Enables the web UI and tells Træfik to listen to docker
-    container_name: traefik
-    restart: always
     networks:
       - default
       - traefik_proxy
@@ -34,6 +31,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${DOCKER_DIR}/traefik:/etc/traefik
       - ${DOCKER_DIR}/shared:/shared
+    deploy:
+      placement:
+        constraints: [ node.role == manager ]
+      restart_policy:
+        condition: on-failure
+        window: 1200s # This value should probably be equal to the duration of your battery backup when off mains power.
 
 ######### FRONTENDS ##########
 
@@ -98,9 +101,9 @@ services:
       - ${DOCKER_DIR}/Downloads/completed:/data/completed
       - ${DOCKER_DIR}/Downloads/incomplete:/data/incomplete
     environment:
-      - OPENVPN_PROVIDER=IPVANISH
-      - OPENVPN_USERNAME=ipvanish_username
-      - OPENVPN_PASSWORD=ipvanish_password
+      - OPENVPN_PROVIDER=NORDVPN
+      - OPENVPN_USERNAME=${TRANSMISSION_VPN_USERNAME}
+      - OPENVPN_PASSWORD=${TRANSMISSION_VPN_PASSWORD}
       - OPENVPN_CONFIG="YYYYYYYYYYY"
       - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
       - LOCAL_NETWORK=192.168.1.0/24
@@ -232,7 +235,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/plexms:/config
       - ${DOCKER_DIR}/Downloads/plex_tmp:/transcode
-      - /media/media:/media
+      - ${DOCKER_DIR}/media/media:/media
       - ${DOCKER_DIR}/shared:/shared
     ports:
       - "32400:32400/tcp"
@@ -251,6 +254,18 @@ services:
       - PLEX_UID=${PUID}
       - PLEX_GID=${PGID}
       - ADVERTISE_IP="http://SERVER-IP:32400/"
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=plexms"
+      - "traefik.frontend.rule=Host:plex.${DOMAIN_NAME}"
+      - "traefik.port=32400"
+      - "traefik.protocol=http"
+      - "traefik.docker.network=traefik_proxy"
+    # deploy:
+    #   placement:
+    #     constraints: [] #some constraint
 
 # Tautulli (aka PlexPy) – Monitoring Plex Usage
   tautulli:
@@ -260,7 +275,7 @@ services:
     image: linuxserver/tautulli
     volumes:
       - ${DOCKER_DIR}/tautulli/config:/config
-      - ${DOCKER_DIR}/tautulli/logs:/logs:ro
+      #- ${DOCKER_DIR}/tautulli/logs:/logs:ro
       - ${DOCKER_DIR}/shared:/shared
     # ports:
     #   - "XXXX:8181"
