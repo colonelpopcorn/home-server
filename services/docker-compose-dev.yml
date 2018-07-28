@@ -29,6 +29,7 @@ services:
       - "traefik.docker.network=traefik_proxy"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./configs/traefik.toml:/etc/traefik/traefik.toml
       - ${DOCKER_DIR}/traefik:/etc/traefik
       - ${DOCKER_DIR}/shared:/shared
     deploy:
@@ -63,6 +64,12 @@ services:
       - ${DOCKER_DIR}/shared:/shared
     environment:
       - TZ=${TZ}
+    deploy:
+      placement:
+        constraints: [ node.role == manager ]
+      restart_policy:
+        condition: on-failure
+        window: 1200s # This value should probably be equal to the duration of your battery backup when off mains power.
 
 ######### DOCKER RELATED ##########
 
@@ -75,6 +82,12 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --schedule "0 0 4 * * *" --cleanup
+    deploy:
+      placement:
+        constraints: [ node.role == manager ]
+      restart_policy:
+        condition: on-failure
+        window: 1200s # This value should probably be equal to the duration of your battery backup when off mains power.
 
 ######### DOWNLOADERS ##########
 
@@ -302,23 +315,6 @@ services:
 
 ######### SEARCHERS ##########
 
-# NZBHydra – NZB Meta Search
-#  hydra:
-#    image: "linuxserver/hydra"
-#    hostname: hydra
-#    container_name: "hydra"
-#    volumes:
-#      - ${DOCKER_DIR}/hydra:/config
-#      - ${DOCKER_DIR}/Downloads:/downloads
-#      - ${DOCKER_DIR}/shared:/shared
-#    ports:
-#      - "XXXX:5075"
-#    restart: always
-#    environment:
-#      - PUID=${PUID}
-#      - PGID=${PGID}
-#      - TZ=${TZ}
-
 # Jackett – Torrent Proxy
   jackett:
     image: "linuxserver/jackett"
@@ -339,40 +335,10 @@ services:
 
 ######### UTILITIES ##########
 
-# MariaDB – Database Server for your Apps
-#  mariadb:
-#    image: "linuxserver/mariadb"
-#    container_name: "mariadb"
-#    hostname: mariadb
-#    volumes:
-#        - ${DOCKER_DIR}/mariadb:/config
-#    ports:
-#      - target: 3306
-#        published: 3306
-#        protocol: tcp
-#        mode: host
-#    restart: always
-#    environment:
-#      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-#      - PUID=${PUID}
-#      - PGID=${PGID}
-#      - TZ=${TZ}
+# Mattermost - Chat platform
 
-# NextCloud – Your Own Cloud Storage
-#  nextcloud:
-#    container_name: nextcloud
-#    hostname: nextcloud
-#    restart: always
-#    image: linuxserver/nextcloud
-#    volumes:
-#      - ${DOCKER_DIR}/nextcloud:/config
-#      - ${DOCKER_DIR}/shared_data:/data
-#      - ${DOCKER_DIR}/shared:/shared
-#    ports:
-#      - "XXXX:443"
-#    environment:
-#      - PUID=${PUID}
-#      - PGID=${PGID}
+# Archimedes - Hedwig chat-bot, needs to be built.
+
 networks:
   traefik_proxy:
     external:
