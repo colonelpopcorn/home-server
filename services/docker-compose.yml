@@ -1,35 +1,364 @@
-version: '3'
+#Reference: https://www.smarthomebeginner.com/docker-home-media-server-2018-basic
+#Requirement: Set environmental variables: USERDIR, PUID, PGID, TRAEFIK_HTTP_PORT, TRAEFIK_HTTPS_PORT, TRAEFIK_UI_PORT, and TZ as explained in the reference.
 
+version: "3.6"
 services:
 
-  reverse-proxy:
-    image: traefik:latest # The official Traefik docker image
+######### MAIN PROXY - traefik ##########
+
+  traefik:
+    image: traefik:latest
     command: --api --docker # Enables the web UI and tells Træfik to listen to docker
+    networks:
+      - default
+      - traefik_proxy
     ports:
-      - "80:80"     # The HTTP port
-      - "443:443"   # The HTTPS port
-      - "9876:8080" # The Web UI (enabled by --api)
+      # - "8080:80" # For Windows because it doesn't like to use the basic ports for HTTP(S)
+      # - "4430:443" # For Windows because it doesn't like to use the basic ports for HTTP(S)
+      - "80:80"
+      - "443:443"
+    environment:
+      - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
+      - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=traefik"
+      - "traefik.frontend.rule=Host:traefik.${DOMAIN_NAME}"
+      - "traefik.port=8080"
+      - "traefik.docker.network=traefik_proxy"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # - ./configs/traefik.toml:/etc/traefik/traefik.toml # This should be commented out until our infra is ready.
       - ${DOCKER_DIR}/traefik:/etc/traefik
       - ${DOCKER_DIR}/shared:/shared
     deploy:
-      constraints: [node.role == manager]
+      placement:
+        constraints: [ node.role == manager ]
+      restart_policy:
+        condition: on-failure
+        window: 1200s # This value should probably be equal to the duration of your battery backup when off mains power.
 
+######### FRONTENDS/WEBMIN ##########
+
+ #Portainer - WebUI for Containers
   portainer:
     image: portainer/portainer
-    labels:
-      - "traefik.frontend.rule=Host:portainer.${DOMAIN_NAME}"
-      - "traefik.portainer.port=9000"
-      - "traefik.docker.network=traefik_proxy"
-    command: -H unix:///var/run/docker.sock
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ${DOCKER_DIR}/portainer:/data
+    hostname: portainer
+    container_name: portainer
+    restart: always
+    command: --templates http://templates/templates.json
+    # ports:
+    #   - "XXXX:9000"
     networks:
       - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=portainer"
+      - "traefik.frontend.rule=Host:portainer.${DOMAIN_NAME}"
+      - "traefik.port=9000"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_DIR}/portainer/data:/data
+      - ${DOCKER_DIR}/shared:/shared
+    environment:
+      - TZ=${TZ}
     deploy:
-      constraints: [node.role == manager]
+      placement:
+        constraints: [ node.role == manager ]
+      restart_policy:
+        condition: on-failure
+        window: 1200s # This value should probably be equal to the duration of your battery backup when off mains power.
+
+######### DOCKER RELATED ##########
+
+# Watchtower - Automatic Update of Containers/Apps
+  watchtower:
+    container_name: watchtower
+    hostname: watchtower
+    restart: always
+    image: v2tec/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 0 4 * * *" --cleanup
+    deploy:
+      placement:
+        constraints: [ node.role == manager ]
+      restart_policy:
+        condition: on-failure
+        window: 1200s # This value should probably be equal to the duration of your battery backup when off mains power.
+
+######### DOWNLOADERS ##########
+
+# Transmission with VPN – Bittorrent Downloader
+  transmission:
+    container_name: transmission-vpn
+    hostname: transmission
+    image: haugene/transmission-openvpn
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    restart: always
+    # ports:
+    # - "XXXX:9091"
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=transmission"
+      - "traefik.frontend.rule=Host:transmission.${DOMAIN_NAME}"
+      - "traefik.port=9091"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/transmission-vpn:/data
+      - ${DOCKER_DIR}/shared:/shared
+      - ${DOCKER_DIR}/Downloads:/data/watch
+      - ${DOCKER_DIR}/Downloads/completed:/data/completed
+      - ${DOCKER_DIR}/Downloads/incomplete:/data/incomplete
+    environment:
+      - OPENVPN_PROVIDER=NORDVPN
+      - OPENVPN_USERNAME=${TRANSMISSION_VPN_USERNAME}
+      - OPENVPN_PASSWORD=${TRANSMISSION_VPN_PASSWORD}
+      - OPENVPN_CONFIG="YYYYYYYYYYY"
+      - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
+      - LOCAL_NETWORK=192.168.1.0/24
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - TRANSMISSION_RPC_AUTHENTICATION_REQUIRED=true
+      - TRANSMISSION_RPC_HOST_WHITELIST="127.0.0.1,192.168.*.*"
+      - TRANSMISSION_RPC_PASSWORD=${TRANSMISSION_RPC_PASSWORD}
+      - TRANSMISSION_RPC_USERNAME=${TRANSMISSION_RPC_USERNAME}
+      - TRANSMISSION_UMASK=002
+      - TRANSMISSION_RATIO_LIMIT=0.01
+      - TRANSMISSION_RATIO_LIMIT_ENABLED=true
+      - TRANSMISSION_ALT_SPEED_DOWN=2000
+      - TRANSMISSION_ALT_SPEED_ENABLED=true
+      - TRANSMISSION_ALT_SPEED_UP=15
+      - TRANSMISSION_SPEED_LIMIT_DOWN=6000
+      - TRANSMISSION_SPEED_LIMIT_DOWN_ENABLED=true
+      - TRANSMISSION_SPEED_LIMIT_UP=30
+      - TRANSMISSION_SPEED_LIMIT_UP_ENABLED=true
+      - TRANSMISSION_INCOMPLETE_DIR=/downloads/incomplete
+      - TRANSMISSION_INCOMPLETE_DIR_ENABLED=true
+      - TRANSMISSION_WATCH_DIR=/downloads
+      - TRANSMISSION_WATCH_DIR_ENABLED=true
+      - TRANSMISSION_DOWNLOAD_DIR=/downloads/completed
+
+######### PERSONAL VIDEO RECORDERS ##########
+
+# Radarr – Movie Download and Management
+  radarr:
+    image: "linuxserver/radarr"
+    hostname: radarr
+    container_name: "radarr"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=radarr"
+      - "traefik.frontend.rule=Host:radarr.${DOMAIN_NAME}"
+      - "traefik.port=7878"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - ${DOCKER_DIR}/radarr:/config
+      - ${DOCKER_DIR}/Downloads/completed:/downloads
+      - ${DOCKER_DIR}/media/movies:/movies
+      - "/etc/localtime:/etc/localtime:ro"
+      - ${DOCKER_DIR}/shared:/shared
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+# Sonarr – TV Show Download and Management
+  sonarr:
+    image: "linuxserver/sonarr"
+    hostname: sonarr
+    container_name: "sonarr"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=sonarr"
+      - "traefik.frontend.rule=Host:sonarr.${DOMAIN_NAME}"
+      - "traefik.port=8989"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - ${DOCKER_DIR}/sonarr:/config
+      - ${DOCKER_DIR}/Downloads/completed:/downloads
+      - ${DOCKER_DIR}/media/tvshows:/tv
+      - "/etc/localtime:/etc/localtime:ro"
+      - ${DOCKER_DIR}/shared:/shared
+    # ports:
+    #     - "XXXX:8989"
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+#LIDARR - Music Download and Management
+  lidarr:
+    image: "linuxserver/lidarr"
+    hostname: lidarr
+    container_name: "lidarr"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=lidarr"
+      - "traefik.frontend.rule=Host:lidarr.${DOMAIN_NAME}"
+      - "traefik.port=8686"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - ${DOCKER_DIR}/lidarr:/config
+      - ${DOCKER_DIR}/Downloads:/downloads
+      - ${DOCKER_DIR}/media/music:/music
+      - "/etc/localtime:/etc/localtime:ro"
+      - ${DOCKER_DIR}/shared:/shared
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+######### MEDIA SERVER APPS ##########
+
+# Plex Media Server
+  plexms:
+    container_name: plexms
+    hostname: plexms
+    restart: always
+    image: plexinc/pms-docker
+    volumes:
+      - ${DOCKER_DIR}/plexms:/config
+      - ${DOCKER_DIR}/Downloads/plex_tmp:/transcode
+      - ${DOCKER_DIR}/media/media:/media
+      - ${DOCKER_DIR}/shared:/shared
+    ports:
+      - "32400:32400/tcp"
+      - "3005:3005/tcp"
+      - "8324:8324/tcp"
+      - "32469:32469/tcp"
+      - "1900:1900/udp"
+      - "32410:32410/udp"
+      - "32412:32412/udp"
+      - "32413:32413/udp"
+      - "32414:32414/udp"
+    environment:
+      - TZ=${TZ}
+      - HOSTNAME="Docker Plex"
+      - PLEX_CLAIM="claim-YYYYYYYYY"
+      - PLEX_UID=${PUID}
+      - PLEX_GID=${PGID}
+      - ADVERTISE_IP="http://SERVER-IP:32400/"
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=plexms"
+      - "traefik.frontend.rule=Host:plex.${DOMAIN_NAME}"
+      - "traefik.port=32400"
+      - "traefik.protocol=http"
+      - "traefik.docker.network=traefik_proxy"
+    # deploy:
+    #   placement:
+    #     constraints: [] #some constraint
+
+# Tautulli (aka PlexPy) – Monitoring Plex Usage
+  tautulli:
+    container_name: tautulli
+    hostname: tautulli
+    restart: always
+    image: linuxserver/tautulli
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=tautulli"
+      - "traefik.frontend.rule=Host:tautulli.${DOMAIN_NAME}"
+      - "traefik.port=8181"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - ${DOCKER_DIR}/tautulli/config:/config
+      - ${DOCKER_DIR}/tautulli/logs:/logs:ro
+      - ${DOCKER_DIR}/shared:/shared
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+# Ombi – Accept Requests for your Media Server
+  ombi:
+    container_name: ombi
+    hostname: ombi
+    restart: always
+    image: linuxserver/ombi
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=ombi"
+      - "traefik.frontend.rule=Host:ombi.${DOMAIN_NAME}"
+      - "traefik.port=3579"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - ${DOCKER_DIR}/ombi:/config
+      - ${DOCKER_DIR}/shared:/shared
+    # ports:
+    #   - "XXXX:3579"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+######### SEARCHERS ##########
+
+# Jackett – Torrent Proxy
+  jackett:
+    image: "linuxserver/jackett"
+    hostname: jackett
+    container_name: "jackett"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=jackett"
+      - "traefik.frontend.rule=Host:jackett.${DOMAIN_NAME}"
+      - "traefik.port=9117"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - ${DOCKER_DIR}/jackett:/config
+      - ${DOCKER_DIR}/Downloads/completed:/downloads
+      - "/etc/localtime:/etc/localtime:ro"
+      - ${DOCKER_DIR}/shared:/shared
+    # ports:
+    #   - "XXXX:9117"
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+######### COMMS ##########
+
+# Mattermost - Chat platform
+
+# Archimedes - Hedwig chat-bot, needs to be built.
+
+######### DEVELOPMENT ##########
+
+# Jenkins CI - Docker powered, blue ocean, teenaged CI daydream.
+
+# Gittea - Simple git hosting, may or may not use.
+
+######### GAME SERVERS ##########
+
+# Left 4 Dead 2
+
+# TF2
+
+# Garry's Mod
+
+# Minecraft
+
+# Terraria
+
+# Starbound
 
 networks:
   traefik_proxy:
