@@ -1,11 +1,9 @@
 #Reference: https://www.smarthomebeginner.com/docker-home-media-server-2018-basic
-#Requirement: Set environmental variables: USERDIR, PUID, PGID, TRAEFIK_HTTP_PORT, TRAEFIK_HTTPS_PORT, TRAEFIK_UI_PORT, and TZ as explained in the reference.
+#Requirement: Set environment variables: USERDIR, PUID, PGID, TRAEFIK_HTTP_PORT, TRAEFIK_HTTPS_PORT, TRAEFIK_UI_PORT, and TZ as explained in the reference.
 
 version: "3.6"
 services:
-
-######### MAIN PROXY - traefik ##########
-
+# traefik - Main proxy server, this the goods kids.
   traefik:
     image: traefik:latest
     command: --api --docker # Enables the web UI and tells Træfik to listen to docker
@@ -39,9 +37,7 @@ services:
         condition: on-failure
         window: 1200s # This value should probably be equal to the duration of your battery backup when off mains power.
 
-######### FRONTENDS/WEBMIN ##########
-
- #Portainer - WebUI for Containers
+# Portainer - WebUI for Containers
   portainer:
     image: portainer/portainer
     hostname: portainer
@@ -71,8 +67,6 @@ services:
         condition: on-failure
         window: 1200s # This value should probably be equal to the duration of your battery backup when off mains power.
 
-######### DOCKER RELATED ##########
-
 # Watchtower - Automatic Update of Containers/Apps
   watchtower:
     container_name: watchtower
@@ -89,7 +83,13 @@ services:
         condition: on-failure
         window: 1200s # This value should probably be equal to the duration of your battery backup when off mains power.
 
-######### DOWNLOADERS ##########
+# Zabbix - Hardware monitoring
+
+# Prometheus - Container monitoring
+
+# Huggin - For IFTTT?
+
+# osTicket - To support my own infrastructure I guess.
 
 # Transmission with VPN – Bittorrent Downloader
   transmission:
@@ -149,8 +149,6 @@ services:
       - TRANSMISSION_WATCH_DIR_ENABLED=true
       - TRANSMISSION_DOWNLOAD_DIR=/downloads/completed
 
-######### PERSONAL VIDEO RECORDERS ##########
-
 # Radarr – Movie Download and Management
   radarr:
     image: "linuxserver/radarr"
@@ -199,7 +197,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
 
-#LIDARR - Music Download and Management
+# Lidarr - Music Download and Management
   lidarr:
     image: "linuxserver/lidarr"
     hostname: lidarr
@@ -222,9 +220,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
 
-######### MEDIA SERVER APPS ##########
-
-# Plex Media Server
+# Plex Media Server - Enough said I think
   plexms:
     container_name: plexms
     hostname: plexms
@@ -308,8 +304,6 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
 
-######### SEARCHERS ##########
-
 # Jackett – Torrent Proxy
   jackett:
     image: "linuxserver/jackett"
@@ -334,19 +328,23 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
 
-######### COMMS ##########
-
 # Mattermost - Chat platform
 
 # Archimedes - Hedwig chat-bot, needs to be built.
-
-######### DEVELOPMENT ##########
 
 # Jenkins CI - Docker powered, blue ocean, teenaged CI daydream.
 
 # Gittea - Simple git hosting, may or may not use.
 
-######### GAME SERVERS ##########
+# Eclipse Che - Web based IDE powered by Docker.
+
+# OpenFaaS - Could be fun, eh?
+
+# Wekan - Could be useful maybe?
+
+# Pi-Hole - Should go somewhere right?
+
+# Directory server of some kind
 
 # Left 4 Dead 2
 
