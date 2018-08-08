@@ -6,7 +6,7 @@ services:
 # traefik - Main proxy server, this the goods kids.
   traefik:
     image: traefik:latest
-    command: --api --docker # Enables the web UI and tells Træfik to listen to docker
+    command: --docker --docker.swarmMode --api # Enables the web UI and tells Træfik to listen to docker
     networks:
       - default
       - traefik_proxy
@@ -19,18 +19,18 @@ services:
       - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
       - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
       - DOMAIN_NAME=${DOMAIN_NAME}
-    labels:
-      - "traefik.enable=true"
-      - "traefik.backend=traefik"
-      - "traefik.frontend.rule=Host:traefik.${DOMAIN_NAME}"
-      - "traefik.port=8080"
-      - "traefik.docker.network=traefik_proxy"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # - ./configs/traefik.toml:/etc/traefik/traefik.toml # This should be commented out until our infra is ready.
       - ${DOCKER_DIR}/traefik:/etc/traefik
       - ${DOCKER_DIR}/shared:/shared
     deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.backend=traefik"
+        - "traefik.frontend.rule=Host:traefik.${DOMAIN_NAME}"
+        - "traefik.port=8080"
+        - "traefik.docker.network=traefik_proxy"
       placement:
         constraints: [ node.role == manager ]
       restart_policy:
@@ -316,7 +316,7 @@ services:
   #     - ${DOCKER_DIR}/gittea/data:/data
   #   restart: always
 
-# Mattermost - Chat platform, NOT WORKING!
+# Mattermost - Chat platform, NOT WORKING! Oh wait, just linux permissions lolololol...
   mattermost:
     image: mattermost/mattermost-prod-app
     restart: unless-stopped
@@ -340,8 +340,6 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-
-# Zabbix - Hardware monitoring
 
 # Huggin - For IFTTT?
 
