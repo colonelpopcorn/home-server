@@ -19,4 +19,4 @@
     kubernetes_enable_web_ui: True
     kubernetes_allow_pods_on_master: True
     kubernetes_debug: True
-    kubernetes_version: stable-1.11
+    kubernetes_version: 'stable-1.11'
