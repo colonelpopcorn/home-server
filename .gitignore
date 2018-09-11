@@ -4,5 +4,3 @@
 **/roles/
 scripts/hosts
 scripts/hosts.yml
-**/.env
-traefik.toml
