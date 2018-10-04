@@ -17,8 +17,6 @@ services:
 
 # Pi-Hole - Should go somewhere right?
 
-# Directory server of some kind
-
 # Gittea - Simple git hosting, may or may not use. SSH no is working.
   # gittea:
   #   image: gitea/gitea
