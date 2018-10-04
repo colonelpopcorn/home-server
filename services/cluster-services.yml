@@ -1,4 +1,4 @@
-version: "3.6"
+version: '3'
 services:
 # traefik - Main proxy server, this the goods kids.
   traefik:
