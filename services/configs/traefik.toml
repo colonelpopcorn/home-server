@@ -35,9 +35,9 @@ onDemand = false #create certificate when container is created
   provider = "cloudflare"
   delayBeforeCheck = 0
 [[acme.domains]]
-   main = "EXAMPLE.COM"
+    main = "EXAMPLE.COM"
 [[acme.domains]]
-   main = "*.EXAMPLE.COM"
+    main = "*.EXAMPLE.COM"
 
 # Connection to docker host system (docker.sock)
 [docker]
