@@ -155,41 +155,6 @@ services:
 #endregion
 
 #region Media Services
-# Transmission with VPN – Bittorrent Downloader
-  transmission:
-    image: haugene/transmission-openvpn
-    cap_add:
-      - NET_ADMIN
-    devices:
-      - /dev/net/tun
-    restart: always
-    # ports:
-    # - "XXXX:9091"
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-    labels:
-      - "traefik.enable=true"
-      - "traefik.backend=transmission"
-      - "traefik.frontend.rule=Host:transmission.${DOMAIN_NAME}"
-      - "traefik.port=9091"
-      - "traefik.docker.network=traefik_proxy"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_DIR}/transmission-vpn:/data
-      - ${DOCKER_DIR}/shared:/shared
-      - ${DOCKER_DIR}/Downloads:/data/watch
-      - ${DOCKER_DIR}/Downloads/completed:/data/completed
-      - ${DOCKER_DIR}/Downloads/incomplete:/data/incomplete
-    environment:
-      - OPENVPN_PROVIDER=NORDVPN
-      - OPENVPN_USERNAME=${TRANSMISSION_VPN_USERNAME}
-      - OPENVPN_PASSWORD=${TRANSMISSION_VPN_PASSWORD}
-      - TRANSMISSION_RPC_AUTHENTICATION_REQUIRED=true
-      - TRANSMISSION_RPC_HOST_WHITELIST="127.0.0.1,192.168.*.*"
-      - TRANSMISSION_RPC_PASSWORD=${TRANSMISSION_RPC_PASSWORD}
-      - TRANSMISSION_RPC_USERNAME=${TRANSMISSION_RPC_USERNAME}
-
 # Radarr – Movie Download and Management
   radarr:
     image: "linuxserver/radarr"
