@@ -5,3 +5,4 @@
 scripts/hosts
 scripts/hosts.yml
 **/.env
+.htpasswd
