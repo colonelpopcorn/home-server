@@ -2,6 +2,7 @@ version: '3'
 services:
   ddns-updater:
     image: joshuaavalon/cloudflare-ddns
+    restart: always
     environment:
       - ZONE=${ZONE}
       - HOST=${HOST}
@@ -14,8 +15,8 @@ services:
     devices:
       - /dev/net/tun
     restart: always
-    # ports:
-    # - "XXXX:9091"
+    ports:
+    - "9091:9091"
     dns:
       - 1.1.1.1
       - 1.0.0.1

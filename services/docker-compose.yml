@@ -157,7 +157,7 @@ services:
 #region Media Services
 # Radarr – Movie Download and Management
   radarr:
-    image: "linuxserver/radarr"
+    image: linuxserver/radarr
     labels:
       - "traefik.enable=true"
       - "traefik.backend=radarr"
@@ -166,7 +166,7 @@ services:
       - "traefik.docker.network=traefik_proxy"
     volumes:
       - ${DOCKER_DIR}/radarr:/config
-      - ${DOCKER_DIR}/Downloads/completed:/downloads
+      - $${DOCKER_DIR}/transmission-vpn/completed:/downloads
       - ${DOCKER_DIR}/media/movies:/movies
       - "/etc/localtime:/etc/localtime:ro"
       - ${DOCKER_DIR}/shared:/shared
@@ -178,7 +178,7 @@ services:
 
 # Sonarr – TV Show Download and Management
   sonarr:
-    image: "linuxserver/sonarr"
+    image: linuxserver/sonarr
     labels:
       - "traefik.enable=true"
       - "traefik.backend=sonarr"
@@ -187,7 +187,7 @@ services:
       - "traefik.docker.network=traefik_proxy"
     volumes:
       - ${DOCKER_DIR}/sonarr:/config
-      - ${DOCKER_DIR}/Downloads/completed:/downloads
+      - $${DOCKER_DIR}/transmission-vpn/completed:/downloads
       - ${DOCKER_DIR}/media/tvshows:/tv
       - "/etc/localtime:/etc/localtime:ro"
       - ${DOCKER_DIR}/shared:/shared
@@ -201,7 +201,7 @@ services:
 
 # Lidarr - Music Download and Management
   lidarr:
-    image: "linuxserver/lidarr"
+    image: linuxserver/lidarr
     labels:
       - "traefik.enable=true"
       - "traefik.backend=lidarr"
@@ -221,8 +221,42 @@ services:
       - TZ=${TZ}
 
 # Mylar - Comic book downloader
+  mylar:
+    image: linuxserver/mylar
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=mylar"
+      - "traefik.frontend.rule=Host:mylar.${DOMAIN_NAME}"
+      - "traefik.port=8090"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - ${DOCKER_DIR}/mylar:/config
+      - ${DOCKER_DIR}/Downloads:/downloads
+      - ${DOCKER_DIR}/media/comics:/comics
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
 
 # Lazy Librarian - eBook downloader
+  lazylibrarian:
+    image: linuxserver/lazylibrarian
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=lazylibrarian"
+      - "traefik.frontend.rule=Host:lazylibrarian.${DOMAIN_NAME}"
+      - "traefik.port=5299"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - ${DOCKER_DIR}/lazylibrarian:/config
+      - ${DOCKER_DIR}/Downloads:/downloads
+      - ${DOCKER_DIR}/media/books:/books
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
 
 # Plex Media Server - Enough said I think
   plexms:
@@ -230,7 +264,7 @@ services:
     image: plexinc/pms-docker
     volumes:
       - ${DOCKER_DIR}/plexms:/config
-      - ${DOCKER_DIR}/Downloads/plex_tmp:/transcode
+      - $${DOCKER_DIR}/transmission-vpn/plex_tmp:/transcode
       - ${DOCKER_DIR}/media/media:/media
       - ${DOCKER_DIR}/shared:/shared
     ports:
@@ -313,7 +347,7 @@ services:
       - "traefik.docker.network=traefik_proxy"
     volumes:
       - ${DOCKER_DIR}/jackett:/config
-      - ${DOCKER_DIR}/Downloads/completed:/downloads
+      - $${DOCKER_DIR}/transmission-vpn/completed:/downloads
       - "/etc/localtime:/etc/localtime:ro"
       - ${DOCKER_DIR}/shared:/shared
     # ports:
