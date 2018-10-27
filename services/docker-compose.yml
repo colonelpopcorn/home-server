@@ -167,7 +167,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/radarr:/config
       - $${DOCKER_DIR}/transmission-vpn/completed:/downloads
-      - ${DOCKER_DIR}/media/movies:/movies
+      - ${DOCKER_DIR}/media/Movies:/movies
       - "/etc/localtime:/etc/localtime:ro"
       - ${DOCKER_DIR}/shared:/shared
     restart: always
@@ -188,7 +188,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/sonarr:/config
       - $${DOCKER_DIR}/transmission-vpn/completed:/downloads
-      - ${DOCKER_DIR}/media/tvshows:/tv
+      - ${DOCKER_DIR}/media/Television:/tv
       - "/etc/localtime:/etc/localtime:ro"
       - ${DOCKER_DIR}/shared:/shared
     # ports:
@@ -211,7 +211,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/lidarr:/config
       - ${DOCKER_DIR}/Downloads:/downloads
-      - ${DOCKER_DIR}/media/music:/music
+      - ${DOCKER_DIR}/media/Music:/music
       - "/etc/localtime:/etc/localtime:ro"
       - ${DOCKER_DIR}/shared:/shared
     restart: always
@@ -232,7 +232,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/mylar:/config
       - ${DOCKER_DIR}/Downloads:/downloads
-      - ${DOCKER_DIR}/media/comics:/comics
+      - ${DOCKER_DIR}/media/Comics:/comics
     restart: always
     environment:
       - PUID=${PUID}
@@ -251,7 +251,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/lazylibrarian:/config
       - ${DOCKER_DIR}/Downloads:/downloads
-      - ${DOCKER_DIR}/media/books:/books
+      - ${DOCKER_DIR}/media/Books:/books
     restart: always
     environment:
       - PUID=${PUID}
@@ -261,41 +261,18 @@ services:
 # Plex Media Server - Enough said I think
   plexms:
     restart: always
-    image: plexinc/pms-docker
+    image: linuxserver/plex
     volumes:
       - ${DOCKER_DIR}/plexms:/config
-      - $${DOCKER_DIR}/transmission-vpn/plex_tmp:/transcode
-      - ${DOCKER_DIR}/media/media:/media
+      - ${DOCKER_DIR}/media/Television:/data/tvshows
+      - ${DOCKER_DIR}/media/Movies:/data/movies
+      - ${DOCKER_DIR}/media/Music:/data/music
       - ${DOCKER_DIR}/shared:/shared
-    ports:
-      - "32400:32400/tcp"
-      - "3005:3005/tcp"
-      - "8324:8324/tcp"
-      - "32469:32469/tcp"
-      - "1900:1900/udp"
-      - "32410:32410/udp"
-      - "32412:32412/udp"
-      - "32413:32413/udp"
-      - "32414:32414/udp"
+    network_mode: "host"
     environment:
       - TZ=${TZ}
-      - HOSTNAME="Docker Plex"
-      - PLEX_CLAIM="claim-YYYYYYYYY"
-      - PLEX_UID=${PUID}
-      - PLEX_GID=${PGID}
-      - ADVERTISE_IP="http://SERVER-IP:32400/"
-    networks:
-      - traefik_proxy
-    labels:
-      - "traefik.enable=true"
-      - "traefik.backend=plexms"
-      - "traefik.frontend.rule=Host:plex.${DOMAIN_NAME}"
-      - "traefik.port=32400"
-      - "traefik.protocol=http"
-      - "traefik.docker.network=traefik_proxy"
-    # deploy:
-    #   placement:
-    #     constraints: [] #some constraint
+      - PUID=${PUID}
+      - PGID=${PGID}
 
 # Tautulli (aka PlexPy) – Monitoring Plex Usage
   tautulli:
