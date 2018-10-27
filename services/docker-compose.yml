@@ -166,7 +166,7 @@ services:
       - "traefik.docker.network=traefik_proxy"
     volumes:
       - ${DOCKER_DIR}/radarr:/config
-      - $${DOCKER_DIR}/transmission-vpn/completed:/downloads
+      - ${DOCKER_DIR}/transmission-vpn/completed:/downloads
       - ${DOCKER_DIR}/media/Movies:/movies
       - "/etc/localtime:/etc/localtime:ro"
       - ${DOCKER_DIR}/shared:/shared
@@ -187,7 +187,7 @@ services:
       - "traefik.docker.network=traefik_proxy"
     volumes:
       - ${DOCKER_DIR}/sonarr:/config
-      - $${DOCKER_DIR}/transmission-vpn/completed:/downloads
+      - ${DOCKER_DIR}/transmission-vpn/completed:/downloads
       - ${DOCKER_DIR}/media/Television:/tv
       - "/etc/localtime:/etc/localtime:ro"
       - ${DOCKER_DIR}/shared:/shared
@@ -324,7 +324,7 @@ services:
       - "traefik.docker.network=traefik_proxy"
     volumes:
       - ${DOCKER_DIR}/jackett:/config
-      - $${DOCKER_DIR}/transmission-vpn/completed:/downloads
+      - ${DOCKER_DIR}/transmission-vpn/completed:/downloads
       - "/etc/localtime:/etc/localtime:ro"
       - ${DOCKER_DIR}/shared:/shared
     # ports:
