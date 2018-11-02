@@ -125,29 +125,29 @@ services:
   #   restart: always
 
 # Mattermost - Chat platform, NOT WORKING! Oh wait, just linux permissions lolololol...
-  mattermost:
-    image: mattermost/mattermost-prod-app
-    restart: unless-stopped
-    labels:
-        - "traefik.enable=true"
-        - "traefik.backend=mattermost"
-        - "traefik.frontend.rule=Host:mattermost.${DOMAIN_NAME}"
-        - "traefik.port=8000"
-        - "traefik.docker.network=traefik_proxy"
-    volumes:
-        - ${DOCKER_DIR}/mattermost/config:/mattermost/config:rw
-        - ${DOCKER_DIR}/mattermost/data:/mattermost/data:rw
-        - ${DOCKER_DIR}/mattermost/logs:/mattermost/logs:rw
-        - /etc/localtime:/etc/localtime:ro
-    environment:
-      - DB_HOST=${POSTGRES_HOST}
-      - DB_PORT_NUMBER=${POSTGRES_PORT}
-      - MM_USERNAME=${POSTGRES_USER}
-      - MM_PASSWORD=${POSTGRES_PASS}
-      - MM_DBNAME=${POSTGRES_DB_NAME}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+  # mattermost:
+  #   image: mattermost/mattermost-prod-app
+  #   restart: unless-stopped
+  #   labels:
+  #       - "traefik.enable=true"
+  #       - "traefik.backend=mattermost"
+  #       - "traefik.frontend.rule=Host:mattermost.${DOMAIN_NAME}"
+  #       - "traefik.port=8000"
+  #       - "traefik.docker.network=traefik_proxy"
+  #   volumes:
+  #       - ${DOCKER_DIR}/mattermost/config:/mattermost/config:rw
+  #       - ${DOCKER_DIR}/mattermost/data:/mattermost/data:rw
+  #       - ${DOCKER_DIR}/mattermost/logs:/mattermost/logs:rw
+  #       - /etc/localtime:/etc/localtime:ro
+  #   environment:
+  #     - DB_HOST=${POSTGRES_HOST}
+  #     - DB_PORT_NUMBER=${POSTGRES_PORT}
+  #     - MM_USERNAME=${POSTGRES_USER}
+  #     - MM_PASSWORD=${POSTGRES_PASS}
+  #     - MM_DBNAME=${POSTGRES_DB_NAME}
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
 #endregion
 
 #region Game Services
