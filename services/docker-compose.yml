@@ -8,6 +8,7 @@ services:
     hostname: traefik
     image: traefik:latest
     container_name: traefik
+    restart: always
     domainname: ${DOMAIN_NAME}
     networks:
       - default
@@ -18,33 +19,25 @@ services:
     environment:
       - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
       - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=traefik"
+      - "traefik.frontend.rule=Host:traefik.${DOMAIN_NAME}"
+      - "traefik.port=8080"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=example.com"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${DOCKER_DIR}/traefik:/etc/traefik
       - ${DOCKER_DIR}/shared:/shared
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.backend=traefik"
-        - "traefik.frontend.rule=Host:traefik.${DOMAIN_NAME}"
-        - "traefik.port=8080"
-        - "traefik.docker.network=traefik_proxy"
-        - "traefik.frontend.headers.SSLRedirect=true"
-        - "traefik.frontend.headers.STSSeconds=315360000"
-        - "traefik.frontend.headers.browserXSSFilter=true"
-        - "traefik.frontend.headers.contentTypeNosniff=true"
-        - "traefik.frontend.headers.forceSTSHeader=true"
-        - "traefik.frontend.headers.SSLHost=example.com"
-        - "traefik.frontend.headers.STSIncludeSubdomains=true"
-        - "traefik.frontend.headers.STSPreload=true"
-        - "traefik.frontend.headers.frameDeny=true"
-      placement:
-        constraints: [ node.role == manager ]
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 10
-        window: 120s
 # Portainer - WebUI for Containers
   portainer:
     image: portainer/portainer
@@ -54,26 +47,24 @@ services:
     #   - "XXXX:9000"
     networks:
       - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=portainer"
+      - "traefik.frontend.rule=Host:portainer.${DOMAIN_NAME}"
+      - "traefik.port=9000"
+      - "traefik.docker.network=traefik_proxy"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${DOCKER_DIR}/portainer/data:/data
       - ${DOCKER_DIR}/shared:/shared
     environment:
       - TZ=${TZ}
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.backend=portainer"
-        - "traefik.frontend.rule=Host:portainer.${DOMAIN_NAME}"
-        - "traefik.port=9000"
-        - "traefik.docker.network=traefik_proxy"
-      placement:
-        constraints: [ node.role == manager ]
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 10
-        window: 120s
+
+      # placement:
+      #   constraints: [ node.role == manager ]
+      # restart_policy:
+      #   condition: on-failure
+      #   window: 1200s # This value should probably be equal to the duration of your battery backup when off mains power.
 # Watchtower - Automatic Update of Containers/Apps
   watchtower:
     restart: always
@@ -86,9 +77,7 @@ services:
         constraints: [ node.role == manager ]
       restart_policy:
         condition: on-failure
-        delay: 10s
-        max_attempts: 10
-        window: 120s
+        window: 1200s # This value should probably be equal to the duration of your battery backup when off mains power.
 #endregion
 
 #region Development Services
@@ -125,29 +114,29 @@ services:
   #   restart: always
 
 # Mattermost - Chat platform, NOT WORKING! Oh wait, just linux permissions lolololol...
-  # mattermost:
-  #   image: mattermost/mattermost-prod-app
-  #   restart: unless-stopped
-  #   labels:
-  #       - "traefik.enable=true"
-  #       - "traefik.backend=mattermost"
-  #       - "traefik.frontend.rule=Host:mattermost.${DOMAIN_NAME}"
-  #       - "traefik.port=8000"
-  #       - "traefik.docker.network=traefik_proxy"
-  #   volumes:
-  #       - ${DOCKER_DIR}/mattermost/config:/mattermost/config:rw
-  #       - ${DOCKER_DIR}/mattermost/data:/mattermost/data:rw
-  #       - ${DOCKER_DIR}/mattermost/logs:/mattermost/logs:rw
-  #       - /etc/localtime:/etc/localtime:ro
-  #   environment:
-  #     - DB_HOST=${POSTGRES_HOST}
-  #     - DB_PORT_NUMBER=${POSTGRES_PORT}
-  #     - MM_USERNAME=${POSTGRES_USER}
-  #     - MM_PASSWORD=${POSTGRES_PASS}
-  #     - MM_DBNAME=${POSTGRES_DB_NAME}
-  #     - PUID=${PUID}
-  #     - PGID=${PGID}
-  #     - TZ=${TZ}
+  mattermost:
+    image: mattermost/mattermost-prod-app
+    restart: unless-stopped
+    labels:
+        - "traefik.enable=true"
+        - "traefik.backend=mattermost"
+        - "traefik.frontend.rule=Host:mattermost.${DOMAIN_NAME}"
+        - "traefik.port=8000"
+        - "traefik.docker.network=traefik_proxy"
+    volumes:
+        - ${DOCKER_DIR}/mattermost/config:/mattermost/config:rw
+        - ${DOCKER_DIR}/mattermost/data:/mattermost/data:rw
+        - ${DOCKER_DIR}/mattermost/logs:/mattermost/logs:rw
+        - /etc/localtime:/etc/localtime:ro
+    environment:
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_PORT_NUMBER=${POSTGRES_PORT}
+      - MM_USERNAME=${POSTGRES_USER}
+      - MM_PASSWORD=${POSTGRES_PASS}
+      - MM_DBNAME=${POSTGRES_DB_NAME}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
 #endregion
 
 #region Game Services
@@ -169,6 +158,12 @@ services:
 # Radarr – Movie Download and Management
   radarr:
     image: linuxserver/radarr
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=radarr"
+      - "traefik.frontend.rule=Host:radarr.${DOMAIN_NAME}"
+      - "traefik.port=7878"
+      - "traefik.docker.network=traefik_proxy"
     volumes:
       - ${DOCKER_DIR}/radarr:/config
       - ${DOCKER_DIR}/transmission-vpn/completed:/downloads
@@ -180,25 +175,16 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.backend=radarr"
-        - "traefik.frontend.rule=Host:radarr.${DOMAIN_NAME}"
-        - "traefik.port=7878"
-        - "traefik.docker.network=traefik_proxy"
-      placement:
-        constraints: [ node.role == manager ]
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 10
-        window: 120s
-
 
 # Sonarr – TV Show Download and Management
   sonarr:
     image: linuxserver/sonarr
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=sonarr"
+      - "traefik.frontend.rule=Host:sonarr.${DOMAIN_NAME}"
+      - "traefik.port=8989"
+      - "traefik.docker.network=traefik_proxy"
     volumes:
       - ${DOCKER_DIR}/sonarr:/config
       - ${DOCKER_DIR}/transmission-vpn/completed:/downloads
@@ -212,24 +198,16 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.backend=sonarr"
-        - "traefik.frontend.rule=Host:sonarr.${DOMAIN_NAME}"
-        - "traefik.port=8989"
-        - "traefik.docker.network=traefik_proxy"
-      placement:
-        constraints: [ node.role == manager ]
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 10
-        window: 120s
 
 # Lidarr - Music Download and Management
   lidarr:
     image: linuxserver/lidarr
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=lidarr"
+      - "traefik.frontend.rule=Host:lidarr.${DOMAIN_NAME}"
+      - "traefik.port=8686"
+      - "traefik.docker.network=traefik_proxy"
     volumes:
       - ${DOCKER_DIR}/lidarr:/config
       - ${DOCKER_DIR}/Downloads:/downloads
@@ -241,24 +219,16 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.backend=lidarr"
-        - "traefik.frontend.rule=Host:lidarr.${DOMAIN_NAME}"
-        - "traefik.port=8686"
-        - "traefik.docker.network=traefik_proxy"
-      placement:
-        constraints: [ node.role == manager ]
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 10
-        window: 120s
 
 # Mylar - Comic book downloader
   mylar:
     image: linuxserver/mylar
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=mylar"
+      - "traefik.frontend.rule=Host:mylar.${DOMAIN_NAME}"
+      - "traefik.port=8090"
+      - "traefik.docker.network=traefik_proxy"
     volumes:
       - ${DOCKER_DIR}/mylar:/config
       - ${DOCKER_DIR}/Downloads:/downloads
@@ -268,24 +238,16 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.backend=mylar"
-        - "traefik.frontend.rule=Host:mylar.${DOMAIN_NAME}"
-        - "traefik.port=8090"
-        - "traefik.docker.network=traefik_proxy"
-      placement:
-        constraints: [ node.role == manager ]
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 10
-        window: 120s
 
 # Lazy Librarian - eBook downloader
   lazylibrarian:
     image: linuxserver/lazylibrarian
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=lazylibrarian"
+      - "traefik.frontend.rule=Host:lazylibrarian.${DOMAIN_NAME}"
+      - "traefik.port=5299"
+      - "traefik.docker.network=traefik_proxy"
     volumes:
       - ${DOCKER_DIR}/lazylibrarian:/config
       - ${DOCKER_DIR}/Downloads:/downloads
@@ -295,22 +257,8 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.backend=lazylibrarian"
-        - "traefik.frontend.rule=Host:lazylibrarian.${DOMAIN_NAME}"
-        - "traefik.port=5299"
-        - "traefik.docker.network=traefik_proxy"
-      placement:
-        constraints: [ node.role == manager ]
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 10
-        window: 120s
 
-# Plex Media Server - Enough said I think, but it's a bit different than the others since plex.tv proxies already!
+# Plex Media Server - Enough said I think
   plexms:
     restart: always
     image: linuxserver/plex
@@ -330,6 +278,12 @@ services:
   tautulli:
     restart: always
     image: linuxserver/tautulli
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=tautulli"
+      - "traefik.frontend.rule=Host:tautulli.${DOMAIN_NAME}"
+      - "traefik.port=8181"
+      - "traefik.docker.network=traefik_proxy"
     volumes:
       - ${DOCKER_DIR}/tautulli/config:/config
       - ${DOCKER_DIR}/tautulli/logs:/logs:ro
@@ -338,25 +292,17 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.backend=tautulli"
-        - "traefik.frontend.rule=Host:tautulli.${DOMAIN_NAME}"
-        - "traefik.port=8181"
-        - "traefik.docker.network=traefik_proxy"
-      placement:
-        constraints: [ node.role == manager ]
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 10
-        window: 120s
 
 # Ombi – Accept Requests for your Media Server
   ombi:
     restart: always
     image: linuxserver/ombi
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=ombi"
+      - "traefik.frontend.rule=Host:ombi.${DOMAIN_NAME}"
+      - "traefik.port=3579"
+      - "traefik.docker.network=traefik_proxy"
     volumes:
       - ${DOCKER_DIR}/ombi:/config
       - ${DOCKER_DIR}/shared:/shared
@@ -366,56 +312,34 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.backend=ombi"
-        - "traefik.frontend.rule=Host:ombi.${DOMAIN_NAME}"
-        - "traefik.port=3579"
-        - "traefik.docker.network=traefik_proxy"
-      placement:
-        constraints: [ node.role == manager ]
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 10
-        window: 120s
 
 # Jackett – Torrent Proxy
   jackett:
     image: "linuxserver/jackett"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=jackett"
+      - "traefik.frontend.rule=Host:jackett.${DOMAIN_NAME}"
+      - "traefik.port=9117"
+      - "traefik.docker.network=traefik_proxy"
     volumes:
       - ${DOCKER_DIR}/jackett:/config
       - ${DOCKER_DIR}/transmission-vpn/completed:/downloads
       - "/etc/localtime:/etc/localtime:ro"
       - ${DOCKER_DIR}/shared:/shared
+    # ports:
+    #   - "XXXX:9117"
     restart: always
     environment:
       - PUID=${MMOST_PUID}
       - PGID=${MMOST_PGID}
       - TZ=${TZ}
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.backend=jackett"
-        - "traefik.frontend.rule=Host:jackett.${DOMAIN_NAME}"
-        - "traefik.port=9117"
-        - "traefik.docker.network=traefik_proxy"
-      placement:
-        constraints: [ node.role == manager ]
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 10
-        window: 120s
 
 #endregion
 
-#region Networks
 networks:
   traefik_proxy:
     external:
       name: traefik_proxy
   default:
     driver: bridge
-#endregion
