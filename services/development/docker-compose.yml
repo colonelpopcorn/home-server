@@ -16,21 +16,21 @@ services:
 
 # Wekan - Could be useful maybe?
 
-# Gittea - Simple git hosting, may or may not use. SSH no is working.
-  # gittea:
-  #   image: gitea/gitea
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.gittea.backend=gittea"
-  #     - "traefik.gittea.frontend.rule=Host:gittea.${DOMAIN_NAME}"
-  #     - "traefik.gittea.port=3000"
-  #     - "traefik.gitteassh.backend=gitteassh"
-  #     - "traefik.gitteassh.frontend.rule=Host:gitteassh.${DOMAIN_NAME}"
-  #     - "traefik.gitteassh.port=22"
-  #     - "traefik.docker.network=traefik_proxy"
-  #   volumes:
-  #     - ${DOCKER_DIR}/gittea/data:/data
-  #   restart: always
+Gittea - Simple git hosting, may or may not use. SSH no is working.
+  gittea:
+    image: gitea/gitea
+    labels:
+      - "traefik.enable=true"
+      - "traefik.gittea.backend=gittea"
+      - "traefik.gittea.frontend.rule=Host:gittea.${DOMAIN_NAME}"
+      - "traefik.gittea.port=3000"
+      - "traefik.gitteassh.backend=gitteassh"
+      - "traefik.gitteassh.frontend.rule=Host:gitteassh.${DOMAIN_NAME}"
+      - "traefik.gitteassh.port=22"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - ${DOCKER_DIR}/gittea/data:/data
+    restart: always
 
 # Mattermost - Chat platform, NOT WORKING! Oh wait, just linux permissions lolololol...
   mattermost:
