@@ -1,6 +1,6 @@
 version: '3'
 services:
-#region Cluster Services
+#region Management Services
 # traefik - Main proxy server, this the goods kids.
   traefik:
     hostname: traefik
