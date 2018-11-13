@@ -40,7 +40,7 @@ services:
   portainer:
     image: portainer/portainer
     restart: always
-    command: --templates http://templates/templates.json --admin-password-file '/shared/.htpasswd'
+    command: --templates http://templates/templates.json
     networks:
       - traefik_proxy
     labels:
@@ -55,6 +55,7 @@ services:
       - ${DOCKER_DIR}/shared:/shared
     environment:
       - TZ=${TZ}
+      - PORTAINER_PASS=${PORTAINER_PASS}
 
       # placement:
       #   constraints: [ node.role == manager ]
@@ -68,16 +69,10 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --schedule "0 0 4 * * *" --cleanup
-    deploy:
-      placement:
-        constraints: [ node.role == manager ]
-      restart_policy:
-        condition: on-failure
-        window: 1200s # This value should probably be equal to the duration of your battery backup when off mains power.
 #endregion
 networks:
-traefik_proxy:
-  external:
-    name: traefik_proxy
-default:
-  driver: bridge
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge
