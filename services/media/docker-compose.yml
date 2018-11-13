@@ -13,7 +13,10 @@ services:
       - "traefik.frontend.rule=Host:radarr.${DOMAIN_NAME}"
       - "traefik.port=7878"
       - "traefik.docker.network=traefik_proxy"
-      - "traefik.frontend.auth=true"
+      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
+      - "traefik.frontend.auth.basic.removeHeader=true"
+    networks:
+      - traefik_proxy
     volumes:
       - ${DOCKER_DIR}/radarr:/config
       - ${DOCKER_DIR}/transmission-vpn/completed:/downloads
@@ -35,6 +38,10 @@ services:
       - "traefik.frontend.rule=Host:sonarr.${DOMAIN_NAME}"
       - "traefik.port=8989"
       - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
+      - "traefik.frontend.auth.basic.removeHeader=true"
+    networks:
+      - traefik_proxy
     volumes:
       - ${DOCKER_DIR}/sonarr:/config
       - ${DOCKER_DIR}/transmission-vpn/completed:/downloads
@@ -58,6 +65,10 @@ services:
       - "traefik.frontend.rule=Host:lidarr.${DOMAIN_NAME}"
       - "traefik.port=8686"
       - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
+      - "traefik.frontend.auth.basic.removeHeader=true"
+    networks:
+      - traefik_proxy
     volumes:
       - ${DOCKER_DIR}/lidarr:/config
       - ${DOCKER_DIR}/Downloads:/downloads
@@ -80,6 +91,10 @@ services:
       - "traefik.frontend.rule=Host:mylar.${DOMAIN_NAME}"
       - "traefik.port=8090"
       - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
+      - "traefik.frontend.auth.basic.removeHeader=true"
+    networks:
+      - traefik_proxy
     volumes:
       - ${DOCKER_DIR}/mylar:/config
       - ${DOCKER_DIR}/Downloads:/downloads
@@ -99,6 +114,10 @@ services:
       - "traefik.frontend.rule=Host:lazylibrarian.${DOMAIN_NAME}"
       - "traefik.port=5299"
       - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
+      - "traefik.frontend.auth.basic.removeHeader=true"
+    networks:
+      - traefik_proxy
     volumes:
       - ${DOCKER_DIR}/lazylibrarian:/config
       - ${DOCKER_DIR}/Downloads:/downloads
@@ -135,6 +154,10 @@ services:
       - "traefik.frontend.rule=Host:tautulli.${DOMAIN_NAME}"
       - "traefik.port=8181"
       - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
+      - "traefik.frontend.auth.basic.removeHeader=true"
+    networks:
+      - traefik_proxy
     volumes:
       - ${DOCKER_DIR}/tautulli/config:/config
       - ${DOCKER_DIR}/tautulli/logs:/logs:ro
@@ -154,6 +177,10 @@ services:
       - "traefik.frontend.rule=Host:ombi.${DOMAIN_NAME}"
       - "traefik.port=3579"
       - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
+      - "traefik.frontend.auth.basic.removeHeader=true"
+    networks:
+      - traefik_proxy
     volumes:
       - ${DOCKER_DIR}/ombi:/config
       - ${DOCKER_DIR}/shared:/shared
@@ -173,6 +200,10 @@ services:
       - "traefik.frontend.rule=Host:jackett.${DOMAIN_NAME}"
       - "traefik.port=9117"
       - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
+      - "traefik.frontend.auth.basic.removeHeader=true"
+    networks:
+      - traefik_proxy
     volumes:
       - ${DOCKER_DIR}/jackett:/config
       - ${DOCKER_DIR}/transmission-vpn/completed:/downloads
