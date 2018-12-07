@@ -16,7 +16,7 @@ services:
 
 # Wekan - Could be useful maybe?
 
-Gittea - Simple git hosting, may or may not use. SSH no is working.
+# Gittea - Simple git hosting, may or may not use. SSH no is working.
   gittea:
     image: gitea/gitea
     labels:
