@@ -19,7 +19,7 @@ services:
       - traefik_proxy
     volumes:
       - ${DOCKER_DIR}/radarr:/config
-      - ${DOCKER_DIR}/transmission-vpn/completed:/downloads
+      - ${DOCKER_DIR}/transmission-vpn:/data
       - ${DOCKER_DIR}/media/Movies:/movies
       - "/etc/localtime:/etc/localtime:ro"
       - ${DOCKER_DIR}/shared:/shared
@@ -44,7 +44,7 @@ services:
       - traefik_proxy
     volumes:
       - ${DOCKER_DIR}/sonarr:/config
-      - ${DOCKER_DIR}/transmission-vpn/completed:/downloads
+      - ${DOCKER_DIR}/transmission-vpn:/data
       - ${DOCKER_DIR}/media/Television:/tv
       - "/etc/localtime:/etc/localtime:ro"
       - ${DOCKER_DIR}/shared:/shared
@@ -71,7 +71,7 @@ services:
       - traefik_proxy
     volumes:
       - ${DOCKER_DIR}/lidarr:/config
-      - ${DOCKER_DIR}/Downloads:/downloads
+      - ${DOCKER_DIR}/transmission-vpn:/data
       - ${DOCKER_DIR}/media/Music:/music
       - "/etc/localtime:/etc/localtime:ro"
       - ${DOCKER_DIR}/shared:/shared
@@ -97,7 +97,7 @@ services:
       - traefik_proxy
     volumes:
       - ${DOCKER_DIR}/mylar:/config
-      - ${DOCKER_DIR}/Downloads:/downloads
+      - ${DOCKER_DIR}/transmission-vpn:/data
       - ${DOCKER_DIR}/media/Comics:/comics
     restart: always
     environment:
@@ -120,7 +120,7 @@ services:
       - traefik_proxy
     volumes:
       - ${DOCKER_DIR}/lazylibrarian:/config
-      - ${DOCKER_DIR}/Downloads:/downloads
+      - ${DOCKER_DIR}/transmission-vpn:/data
       - ${DOCKER_DIR}/media/Books:/books
     restart: always
     environment:
@@ -177,8 +177,6 @@ services:
       - "traefik.frontend.rule=Host:ombi.${DOMAIN_NAME}"
       - "traefik.port=3579"
       - "traefik.docker.network=traefik_proxy"
-      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
-      - "traefik.frontend.auth.basic.removeHeader=true"
     networks:
       - traefik_proxy
     volumes:
