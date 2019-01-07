@@ -4,3 +4,6 @@
 **/roles/
 scripts/hosts
 scripts/hosts.yml
+**/.env
+.htpasswd
+services/nas/docker-compose-with-vars.yml

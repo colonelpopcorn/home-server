@@ -1,0 +1,34 @@
+version: '3'
+services:
+  ddns-updater:
+    image: joshuaavalon/cloudflare-ddns
+    restart: always
+    environment:
+      - ZONE=${ZONE}
+      - HOST=${HOST}
+      - EMAIL=${EMAIL}
+      - API=${API_KEY}
+  transmission:
+    image: haugene/transmission-openvpn
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    restart: always
+    ports:
+    - "9091:9091"
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/transmission-vpn:/data
+      - ${DOCKER_DIR}/shared:/shared
+      - ${DOCKER_DIR}/Downloads:/data/watch
+      - ${DOCKER_DIR}/Downloads/completed:/data/completed
+      - ${DOCKER_DIR}/Downloads/incomplete:/data/incomplete
+    environment:
+      - OPENVPN_PROVIDER=NORDVPN
+      - OPENVPN_USERNAME=${TRANSMISSION_VPN_USERNAME}
+      - OPENVPN_PASSWORD=${TRANSMISSION_VPN_PASSWORD}
+      - LOCAL_NETWORK=192.168.0.0/16

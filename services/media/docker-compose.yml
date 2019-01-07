@@ -1,0 +1,226 @@
+#Reference: https://www.smarthomebeginner.com/docker-home-media-server-2018-basic
+#Requirement: Set environment variables: USERDIR, PUID, PGID, TRAEFIK_HTTP_PORT, TRAEFIK_HTTPS_PORT, TRAEFIK_UI_PORT, and TZ as explained in the reference.
+version: '3'
+services:
+
+#region Media Services
+# Radarr – Movie Download and Management
+  radarr:
+    image: linuxserver/radarr
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=radarr"
+      - "traefik.frontend.rule=Host:radarr.${DOMAIN_NAME}"
+      - "traefik.port=7878"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
+      - "traefik.frontend.auth.basic.removeHeader=true"
+    networks:
+      - traefik_proxy
+    volumes:
+      - ${DOCKER_DIR}/radarr:/config
+      - ${DOCKER_DIR}/transmission-vpn:/data
+      - ${DOCKER_DIR}/media/Movies:/movies
+      - "/etc/localtime:/etc/localtime:ro"
+      - ${DOCKER_DIR}/shared:/shared
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+# Sonarr – TV Show Download and Management
+  sonarr:
+    image: linuxserver/sonarr
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=sonarr"
+      - "traefik.frontend.rule=Host:sonarr.${DOMAIN_NAME}"
+      - "traefik.port=8989"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
+      - "traefik.frontend.auth.basic.removeHeader=true"
+    networks:
+      - traefik_proxy
+    volumes:
+      - ${DOCKER_DIR}/sonarr:/config
+      - ${DOCKER_DIR}/transmission-vpn:/data
+      - ${DOCKER_DIR}/media/Television:/tv
+      - "/etc/localtime:/etc/localtime:ro"
+      - ${DOCKER_DIR}/shared:/shared
+    # ports:
+    #     - "XXXX:8989"
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+# Lidarr - Music Download and Management
+  lidarr:
+    image: linuxserver/lidarr
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=lidarr"
+      - "traefik.frontend.rule=Host:lidarr.${DOMAIN_NAME}"
+      - "traefik.port=8686"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
+      - "traefik.frontend.auth.basic.removeHeader=true"
+    networks:
+      - traefik_proxy
+    volumes:
+      - ${DOCKER_DIR}/lidarr:/config
+      - ${DOCKER_DIR}/transmission-vpn:/data
+      - ${DOCKER_DIR}/media/Music:/music
+      - "/etc/localtime:/etc/localtime:ro"
+      - ${DOCKER_DIR}/shared:/shared
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+# Mylar - Comic book downloader
+# TODO: needs securing
+  mylar:
+    image: linuxserver/mylar
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=mylar"
+      - "traefik.frontend.rule=Host:mylar.${DOMAIN_NAME}"
+      - "traefik.port=8090"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
+      - "traefik.frontend.auth.basic.removeHeader=true"
+    networks:
+      - traefik_proxy
+    volumes:
+      - ${DOCKER_DIR}/mylar:/config
+      - ${DOCKER_DIR}/transmission-vpn:/data
+      - ${DOCKER_DIR}/media/Comics:/comics
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+# Lazy Librarian - eBook downloader
+  lazylibrarian:
+    image: linuxserver/lazylibrarian
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=lazylibrarian"
+      - "traefik.frontend.rule=Host:lazylibrarian.${DOMAIN_NAME}"
+      - "traefik.port=5299"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
+      - "traefik.frontend.auth.basic.removeHeader=true"
+    networks:
+      - traefik_proxy
+    volumes:
+      - ${DOCKER_DIR}/lazylibrarian:/config
+      - ${DOCKER_DIR}/transmission-vpn:/data
+      - ${DOCKER_DIR}/media/Books:/books
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+# Plex Media Server - Enough said I think
+  plexms:
+    restart: always
+    image: plexinc/pms-docker
+    volumes:
+      - ${DOCKER_DIR}/plexms:/config
+      - ${DOCKER_DIR}/media/Television:/data/tvshows
+      - ${DOCKER_DIR}/media/Movies:/data/movies
+      - ${DOCKER_DIR}/media/Music:/data/music
+      - ${DOCKER_DIR}/shared:/shared
+    network_mode: "host"
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - PLEX_CLAIM=${PLEX_TOKEN}
+
+# Tautulli (aka PlexPy) – Monitoring Plex Usage
+  tautulli:
+    restart: always
+    image: linuxserver/tautulli
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=tautulli"
+      - "traefik.frontend.rule=Host:tautulli.${DOMAIN_NAME}"
+      - "traefik.port=8181"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
+      - "traefik.frontend.auth.basic.removeHeader=true"
+    networks:
+      - traefik_proxy
+    volumes:
+      - ${DOCKER_DIR}/tautulli/config:/config
+      - ${DOCKER_DIR}/tautulli/logs:/logs:ro
+      - ${DOCKER_DIR}/shared:/shared
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+# Ombi – Accept Requests for your Media Server
+  ombi:
+    restart: always
+    image: linuxserver/ombi
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=ombi"
+      - "traefik.frontend.rule=Host:ombi.${DOMAIN_NAME}"
+      - "traefik.port=3579"
+      - "traefik.docker.network=traefik_proxy"
+    networks:
+      - traefik_proxy
+    volumes:
+      - ${DOCKER_DIR}/ombi:/config
+      - ${DOCKER_DIR}/shared:/shared
+    # ports:
+    #   - "XXXX:3579"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+# Jackett – Torrent Proxy
+  jackett:
+    image: "linuxserver/jackett"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=jackett"
+      - "traefik.frontend.rule=Host:jackett.${DOMAIN_NAME}"
+      - "traefik.port=9117"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.auth.basic.usersFile=/shared/.htpasswd"
+      - "traefik.frontend.auth.basic.removeHeader=true"
+    networks:
+      - traefik_proxy
+    volumes:
+      - ${DOCKER_DIR}/jackett:/config
+      - ${DOCKER_DIR}/transmission-vpn/completed:/downloads
+      - "/etc/localtime:/etc/localtime:ro"
+      - ${DOCKER_DIR}/shared:/shared
+    # ports:
+    #   - "XXXX:9117"
+    restart: always
+    environment:
+      - PUID=${MMOST_PUID}
+      - PGID=${MMOST_PGID}
+      - TZ=${TZ}
+
+#endregion
+
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge

@@ -1,0 +1,78 @@
+version: '3'
+services:
+#region Management Services
+# traefik - Main proxy server, this the goods kids.
+  traefik:
+    hostname: traefik
+    image: traefik:latest
+    container_name: traefik
+    restart: always
+    domainname: ${DOMAIN_NAME}
+    networks:
+      - default
+      - traefik_proxy
+    ports:
+      - "30080:80"
+      - "30443:443"
+    environment:
+      - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
+      - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=traefik"
+      - "traefik.frontend.rule=Host:traefik.${DOMAIN_NAME}"
+      - "traefik.port=8080"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=${DOMAIN_NAME}"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${DOCKER_DIR}/traefik:/etc/traefik
+      - ${DOCKER_DIR}/shared:/shared
+# Portainer - WebUI for Containers
+  portainer:
+    image: portainer/portainer
+    restart: always
+    command: --templates http://templates/templates.json
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=portainer"
+      - "traefik.frontend.rule=Host:portainer.${DOMAIN_NAME}"
+      - "traefik.port=9000"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_DIR}/portainer/data:/data
+      - ${DOCKER_DIR}/shared:/shared
+    environment:
+      - TZ=${TZ}
+      - PORTAINER_PASS=${PORTAINER_PASS}
+
+      # placement:
+      #   constraints: [ node.role == manager ]
+      # restart_policy:
+      #   condition: on-failure
+      #   window: 1200s # This value should probably be equal to the duration of your battery backup when off mains power.
+# Watchtower - Automatic Update of Containers/Apps
+  watchtower:
+    restart: always
+    image: v2tec/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 0 4 * * *" --cleanup
+#endregion
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge
