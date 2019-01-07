@@ -1,6 +1,8 @@
 version: '3'
 services:
   guacamole:
+    depends_on:
+      - guacd
     links:
       - guacd
     labels:
@@ -11,10 +13,10 @@ services:
       - "traefik.docker.network=traefik_proxy"
     environment:
       - GUACD_HOSTNAME: guacd
-      - MYSQL_DATABASE: ${PG_DB}
+      - MYSQL_DATABASE: ${MYSQL_DB}
       - MYSQL_PORT: 3306
-      - MYSQL_USER: ${PG_USER}
-      - MYSQL_PASSWORD: ${PG_PASS}
+      - MYSQL_USER: ${MYSQL_USER}
+      - MYSQL_PASSWORD: ${MYSQL_PASS}
       - GUACAMOLE_HOME: ${DOCKER_DIR}/guacamole
     image: guacamole/guacamole
     restart: always
