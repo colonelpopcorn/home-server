@@ -6,28 +6,11 @@
   name: "Bootstrap docker onto manager and workers"
   roles:
     - docker
-  tasks:
-    -
-      name: "Initialize swarm manager"
-      command: >
-        docker swarm init --advertise-addr {{ swarm_advertise_ip }}:{{ swarm_advertise_port }}
-      when: swarm_role == 'manager'
-      failed_when: False
-
-    -
-      name: "Get token from manager"
-      command: >
-        docker swarm join-token manager --quiet
-      when: swarm_role == 'manager'
-      run_once: True
-      changed_when: False
-      register: swarm_join_token
-
-    -
-      name: "Join workers to manager"
-      command: >
-        docker swarm join --token {{ swarm_join_token.stdout }} {{ swarm_advertise_ip }}:{{ swarm_advertise_port }}
-      when: swarm_role == 'worker'
+    - kubernetes
   vars:
-    swarm_advertise_ip: 10.0.0.10
-    swarm_advertise_port: 2377
+    docker_edition: 'ce'
+    kubernetes_apiserver_advertise_address: '10.0.0.10'
+    kubernetes_enable_web_ui: True
+    kubernetes_allow_pods_on_master: True
+    kubernetes_debug: True
+    kubernetes_version: 'stable-1.11'
