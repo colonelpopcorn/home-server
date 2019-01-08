@@ -13,6 +13,7 @@ services:
       - "traefik.docker.network=traefik_proxy"
     environment:
       - GUACD_HOSTNAME=guacd
+      - MYSQL_HOSTNAME=${MYSQL_HOST}
       - MYSQL_DATABASE=${MYSQL_DB}
       - MYSQL_PORT=3306
       - MYSQL_USER=${MYSQL_USER}
