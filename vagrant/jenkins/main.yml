@@ -1,0 +1,7 @@
+---
+- hosts: all
+  roles:
+    - java
+    - jenkins
+  vars_files:
+    - vars.yml
