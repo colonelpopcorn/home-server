@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+/**
+ * Lightweight wrapper for vagrant to allow for two(-N) services, one Vagrantfile.
+ * Usage: service [cmd] [name]
+ */
+const fs = require('fs');
+const spawn = require('child_process').spawn;
+const cmd = process.argv[2]
+const currentService =  process.argv[3];
+// Set environment variable for vagrant to know which playbooks to use.
+process.env.CURRENT_SERVICE = currentService;
+try {
+    const stats = fs.lstatSync(`./${currentService}`);
+    const proc = spawn("vagrant", [cmd], {
+        stdio: 'inherit'
+    });
+} catch (error) {
+    if (error.errno === -2) {
+        console.error(`Error: unable to find ${currentService} in the current directory.`);
+    } else {
+        console.error(error);
+    }
+}
