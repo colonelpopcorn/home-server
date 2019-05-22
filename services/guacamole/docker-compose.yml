@@ -5,11 +5,14 @@ services:
       - guacd
     links:
       - guacd
+    networks:
+      - default
+      - traefik_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.gittea.backend=guacamole"
-      - "traefik.gittea.frontend.rule=Host:guacamole.${DOMAIN_NAME}"
-      - "traefik.gittea.port=8080"
+      - "traefik.guacamole.backend=guacamole"
+      - "traefik.guacamole.frontend.rule=Host:guacamole.${DOMAIN_NAME}"
+      - "traefik.guacamole.port=8080"
       - "traefik.docker.network=traefik_proxy"
     environment:
       - GUACD_HOSTNAME=guacd
@@ -18,10 +21,20 @@ services:
       - MYSQL_PORT=3306
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASS}
-      - GUACAMOLE_HOME=${DOCKER_DIR}/guacamole
+      - GUACAMOLE_HOME=/guacamole
     image: guacamole/guacamole
+    volumes:
+      - ${DOCKER_DIR}/guacamole:/guacamole
     restart: always
   guacd:
     hostname: guacd
     image: guacamole/guacd
+    networks:
+      - default
     restart: always
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge
