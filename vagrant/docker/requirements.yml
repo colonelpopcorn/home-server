@@ -1,0 +1,5 @@
+- name: docker
+  src: geerlingguy.docker
+
+- name: pip
+  src: geerlingguy.pip

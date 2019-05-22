@@ -1,0 +1,23 @@
+---
+- hosts: all
+  roles:
+    - pip
+    - docker
+  tasks:
+  - name: Make Docker data directory
+    file:
+      path: /vagrant/docker_data
+      state: directory
+  - name: Install portainer
+    docker_container:
+      name: portainer-master
+      image: portainer/portainer
+      restart_policy: always
+      ports:
+        - "8080:9000"
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+        - /vagrant/docker_data/data:/data
+        - /vagrant/docker_data/shared:/shared
+  vars_files:
+    - vars.yml

@@ -5,10 +5,12 @@
  */
 const fs = require('fs');
 const spawn = require('child_process').spawn;
-const cmd = process.argv[2]
+const cmd = process.argv[2];
 const currentService =  process.argv[3];
+const shouldBecomeSu = process.argv[4] || true;
 // Set environment variable for vagrant to know which playbooks to use.
 process.env.CURRENT_SERVICE = currentService;
+process.env.SHOULD_BECOME_SU = shouldBecomeSu;
 try {
     const stats = fs.lstatSync(`./${currentService}`);
     const proc = spawn("vagrant", [cmd], {
