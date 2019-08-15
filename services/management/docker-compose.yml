@@ -70,6 +70,39 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --schedule "0 0 4 * * *" --cleanup
 #endregion
+# Guacamole - RDP client for accessing compute resources inside the network
+  guacamole:
+      depends_on:
+        - guacd
+      links:
+        - guacd
+      networks:
+        - default
+        - traefik_proxy
+      labels:
+        - "traefik.enable=true"
+        - "traefik.guacamole.backend=guacamole"
+        - "traefik.guacamole.frontend.rule=Host:guacamole.${DOMAIN_NAME}"
+        - "traefik.guacamole.port=8080"
+        - "traefik.docker.network=traefik_proxy"
+      environment:
+        - GUACD_HOSTNAME=guacd
+        - MYSQL_HOSTNAME=${MYSQL_HOST}
+        - MYSQL_DATABASE=${MYSQL_DB}
+        - MYSQL_PORT=3306
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_PASSWORD=${MYSQL_PASS}
+        - GUACAMOLE_HOME=/guacamole
+      image: guacamole/guacamole
+      volumes:
+        - ${DOCKER_DIR}/guacamole:/guacamole
+      restart: always
+  guacd:
+    hostname: guacd
+    image: guacamole/guacd
+    networks:
+      - default
+    restart: always
 networks:
   traefik_proxy:
     external:
