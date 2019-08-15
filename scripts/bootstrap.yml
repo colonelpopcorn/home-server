@@ -1,16 +1,27 @@
 ---
 -
 # Basic playbook to bootstrap docker
-
   hosts: all
   name: "Bootstrap docker onto manager and workers"
   roles:
     - docker
-    - kubernetes
-  vars:
-    docker_edition: 'ce'
-    kubernetes_apiserver_advertise_address: '10.0.0.10'
-    kubernetes_enable_web_ui: True
-    kubernetes_allow_pods_on_master: True
-    kubernetes_debug: True
-    kubernetes_version: 'stable-1.11'
+  tasks:
+  - name: "Initialize swarm manager"
+    command: >
+      docker swarm init --advertise-addr
+      {{ docker_swarm_advertise_address | default(ansible_default_ipv4.address) }}:{{ docker_swarm_advertise_port | default(2377) }}
+    failed_when: False
+    when: docker_swarm_role == 'manager'
+  - name: "Get join token from manager"
+    command: >
+      docker swarm join-token manager --quiet
+    run_once: True
+    changed_when: False
+    register: docker_swarm_join_token
+    when: docker_swarm_role == 'manager'
+  - name: "Join worker to manager"
+    command: >
+      docker swarm join --token {{ docker_swarm_join_token.stdout }}
+      {{ docker_swarm_advertise_address | default(ansible_default_ipv4.address) }}:{{ docker_swarm_advertise_port | default(2377) }}
+    when: docker_swarm_role == 'worker'
+

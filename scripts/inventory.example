@@ -1,0 +1,13 @@
+[manager]
+manager1
+manager2
+
+[worker]
+worker1
+worker2
+
+[manager:vars]
+docker_swarm_role=manager
+
+[worker:vars]
+docker_swarm_role=worker
