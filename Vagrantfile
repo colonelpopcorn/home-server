@@ -31,13 +31,13 @@ Vagrant.configure("2") do |config|
           ansible.limit = "all"
           ansible.become = true
           ansible.groups = {
-            "master" => ["kube-master"],
-            "workers" => ["kube-worker-1", "kube-worker-2"],
-            "master:vars" => {
-              "kubernetes_role" => "master"
+            "manager" => ["swarm-manager"],
+            "worke" => ["swarm-worker-1", "swarm-worker-2"],
+            "manager:vars" => {
+              "docker_swarm_role" => "manager"
             },
-            "workers:vars" => {
-              "kubernetes_role" => "node"
+            "worker:vars" => {
+              "docker_swarm_role" => "worker"
             }
           }
           ansible.raw_arguments = [
