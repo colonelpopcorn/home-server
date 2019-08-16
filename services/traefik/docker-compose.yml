@@ -1,0 +1,47 @@
+# traefik - Main proxy server, this the goods kids.
+version: '3'
+services:
+  traefik:
+    hostname: traefik
+    image: traefik:latest
+    container_name: traefik
+    restart: always
+    domainname: ${DOMAIN_NAME}
+    networks:
+      - default
+      - traefik_proxy
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+    environment:
+      - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
+      - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=traefik"
+      - "traefik.frontend.rule=Host:traefik.${DOMAIN_NAME}"
+      - "traefik.port=8080"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=${DOMAIN_NAME}"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${DOCKER_DIR}/traefik:/etc/traefik
+      - ${DOCKER_DIR}/shared:/shared
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
