@@ -24,4 +24,8 @@
       docker swarm join --token {{ docker_swarm_join_token.stdout }}
       {{ docker_swarm_advertise_address | default(ansible_default_ipv4.address) }}:{{ docker_swarm_advertise_port | default(2377) }}
     when: docker_swarm_role == 'worker'
-
+  vars:
+    docker_swarm_advertise_address: 10.0.5.12
+    docker_swarm_advertise_port: 2377
+    docker_users:
+      - vagrant
