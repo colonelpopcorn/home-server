@@ -11,7 +11,7 @@ Vagrant.configure("2") do |config|
     config.vm.define machine_name do |machine|
       machine.vm.box = "ubuntu/xenial64"
       machine.vm.hostname = machine_name
-      machine.vm.network "private_network", ip: "10.0.0.#{10+machine_id}"
+      machine.vm.network "private_network", ip: "10.0.5.#{10+machine_id}"
       ssh_key = File.readlines("#{Dir.home}/.ssh/vagrant_machine_key").first.strip
       machine.vm.provision "shell" do |s|
         s.inline = <<-SHELL
@@ -32,7 +32,7 @@ Vagrant.configure("2") do |config|
           ansible.become = true
           ansible.groups = {
             "manager" => ["swarm-manager"],
-            "worke" => ["swarm-worker-1", "swarm-worker-2"],
+            "worker" => ["swarm-worker-1", "swarm-worker-2"],
             "manager:vars" => {
               "docker_swarm_role" => "manager"
             },
