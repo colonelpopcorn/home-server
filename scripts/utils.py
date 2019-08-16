@@ -31,4 +31,4 @@ def prep_toml():
 if __name__ == '__main__':
     args = sys.argv
     if len(args) <= 0:
-    run_all()
+        run_all()
