@@ -15,10 +15,6 @@ Vagrant.configure("2") do |config|
       ssh_key = File.readlines("#{Dir.home}/.ssh/vagrant_machine_key").first.strip
       machine.vm.provision "shell" do |s|
         s.inline = <<-SHELL
-          sudo apt-get update
-          sudo apt-get upgrade -y
-          sudo apt-get install python2.7 -y
-          sudo ln -s /usr/bin/python2.7 /usr/bin/python
           echo #{ssh_key} >> /home/vagrant/.ssh/id_rsa
           chown vagrant /home/vagrant/.ssh/id_rsa
           chmod 400 /home/vagrant/.ssh/id_rsa
@@ -39,11 +35,6 @@ Vagrant.configure("2") do |config|
             "worker:vars" => {
               "docker_swarm_role" => "worker"
             }
-          }
-          ansible.host_vars = {
-            "swarm-manager" => {"keepalived_priority" => 100},
-            "swarm-worker-1" => {"keepalived_priority" => 200},
-            "swarm-worker-2" => {"keepalived_priority" => 300},
           }
           ansible.raw_arguments = [
             "--private-key=#{Dir.home}/.ssh/vagrant_machine_key"
