@@ -69,7 +69,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --schedule "0 0 4 * * *" --cleanup
-#endregion
 # Guacamole - RDP client for accessing compute resources inside the network
   guacamole:
       depends_on:
@@ -103,18 +102,7 @@ services:
     networks:
       - default
     restart: always
-# Keepalived - Load balancer for a swarm cluster using IPVS
-  keepalived:
-    hostname: keepalived
-    image: osixia/keepalived:2.0.17
-    networks:
-      - default
-    restart: always
-    environment:
-      - KEEPALIVED_UNICAST_PEERS="#PYTHON2BASH:['192.168.4.1', '192.168.4.2']"
-      - KEEPALIVED_VIRTUAL_IPS=192.168.4.3
-      - KEEPALIVED_PRIORITY=200
-
+#endregion
 networks:
   traefik_proxy:
     external:
