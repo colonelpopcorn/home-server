@@ -40,6 +40,11 @@ Vagrant.configure("2") do |config|
               "docker_swarm_role" => "worker"
             }
           }
+          ansible.host_vars = {
+            "swarm-manager" => {"keepalived_priority" => 100},
+            "swarm-worker-1" => {"keepalived_priority" => 200},
+            "swarm-worker-2" => {"keepalived_priority" => 300},
+          }
           ansible.raw_arguments = [
             "--private-key=#{Dir.home}/.ssh/vagrant_machine_key"
           ]
