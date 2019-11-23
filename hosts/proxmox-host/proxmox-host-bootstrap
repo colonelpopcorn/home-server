@@ -1,2 +1,3 @@
 #!/usr/bin/env python3
-import 
+#TODO: Function to remove subscription message
+#TODO: Function to remove pro repo, add community repo
