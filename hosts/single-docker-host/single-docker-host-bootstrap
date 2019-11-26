@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-#TODO: mount shared drive
-#TODO: create service folders
-#TODO: install docker
+#TODO: mount shared drive - do this later when necessary
 import sys
 import os
 import subprocess
@@ -36,4 +34,5 @@ def install_docker:
     sudo chmod +x /usr/local/bin/docker-compose
     sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
     """
-    subprocess.call(['sh', '-c', set_up_repo_script])    
+    subprocess.call(['sh', '-c', set_up_repo_script])
+        
