@@ -3,16 +3,22 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/bionic64"
+  config.disksize.size = '150GB'
   config.vm.provider "virtualbox" do |vb|
-    vb.customize ["storageattach", :id,
-                  "--storagectl", "IDE",
-                  "--port", "0", "--device", "1",
-                  "--type", "dvddrive",
-                  "--medium", "emptydrive"]
+    vb.customize [
+      "storageattach", :id,
+      "--storagectl", "IDE",
+      "--port", "0", "--device", "1",
+      "--type", "dvddrive",
+      "--medium", "host:E:",
+      "--passthrough", "on"
+    ]
   end
-  config.vm.provision :ansible do |ansible|
-    ansible.limit = "all"
-    ansible.become = true
-    ansible.playbook = "bootstrap.yml"
-  end
+  # provisioner = Vagrant::Util::Platform.windows? ? :ansible_local : :ansible
+  # config.vm.provision provisioner do |ansible|
+  #   ansible.limit = "all"
+  #   ansible.become = true
+  #   ansible.playbook = "bootstrap.yml"
+  #   ansible.galaxy_role_file = "requirements.yml"
+  # end
 end
