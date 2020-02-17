@@ -1,3 +1,0 @@
-# Helm chart values files
-
-This where they go chief. I'm not even using helm right now...
