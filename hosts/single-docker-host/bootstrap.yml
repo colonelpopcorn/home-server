@@ -1,0 +1,39 @@
+---
+- hosts: all
+  roles:
+    - geerlingguy.docker
+  # tasks:
+  #   - name: Collect packages
+  #     apt:
+  #       pkg:
+  #         - apt-transport-https
+  #         - ca-certificates
+  #         - curl
+  #         - gnupg-agent
+  #         - software-properties-common
+  #       state: present
+  #       update_cache: yes
+  #   - name: Get docker gpg key
+  #     apt_key:
+  #       url: https://download.docker.com/linux/ubuntu/gpg
+  #       state: present
+  #   - name: Get current distro variable
+  #     command: lsb_release -cs
+  #     register: current_distro_var
+  #   - name: Add docker repo
+  #     apt_repository:
+  #       repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ current_distro_var.stdout }} stable"
+  #       state: present
+  #   - name: get docker pkgs
+  #     apt:
+  #       pkg:
+  #         - docker-ce
+  #         - docker-ce-cli
+  #         - containerd.io
+  #       state: present
+  #       update_cache: yes
+  #   - name: Get docker-compose
+  #     service:
+  #       name: httpd
+  #       state: started
+

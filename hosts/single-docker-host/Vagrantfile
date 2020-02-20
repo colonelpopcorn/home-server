@@ -1,0 +1,40 @@
+Vagrant.configure("2") do |config|
+
+  config.ssh.forward_agent = true
+  config.vm.define "single-docker-host" do |machine|
+    machine.vm.box = "ubuntu/bionic64"
+    machine.vm.hostname = "single-docker-host"
+    machine.vm.network "private_network", ip: "10.0.5.30"
+    provisioner = Vagrant::Util::Platform.windows? ? :guest_ansible : :ansible
+    machine.vm.provision provisioner do |ansible|
+        ansible.limit = "all"
+        ansible.become = true
+        ansible.galaxy_role_file = "requirements.yml"
+        ansible.playbook = "bootstrap.yml"
+    end
+  end
+end
+#       if machine_id == N
+#         provisioner = Vagrant::Util::Platform.windows? ? :guest_ansible : :ansible
+#         machine.vm.provision provisioner do |ansible|
+#           ansible.limit = "all"
+#           ansible.become = true
+#           ansible.groups = {
+#             "manager" => ["swarm-manager"],
+#             "worker" => ["swarm-worker-1", "swarm-worker-2"],
+#             "manager:vars" => {
+#               "docker_swarm_role" => "manager"
+#             },
+#             "worker:vars" => {
+#               "docker_swarm_role" => "worker"
+#             }
+#           }
+#           ansible.raw_arguments = [
+#             "--private-key=#{Dir.home}/.ssh/vagrant_machine_key"
+#           ]
+#           ansible.galaxy_role_file = "scripts/requirements.yml"
+#           ansible.playbook = "scripts/bootstrap.yml"
+#         end
+#       end
+#     end
+#   end
