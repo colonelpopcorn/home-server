@@ -1,0 +1,47 @@
+version: "3"
+services:
+  #region Fn Project - Docker powered FaaS provider.
+  fn:
+    image: fnproject/fnserver:latest
+    restart: always
+    networks:
+      - default
+      - traefik_proxy
+    command: ./fnserver
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=fn"
+      - "traefik.frontend.rule=Host:fn-server.${DOMAIN_NAME}"
+      - "traefik.port=8080"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_DIR}/iofs:/iofs
+      - ${DOCKER_DIR}/data:/app/data
+    environment:
+      - FN_IOFS_PATH=/iofs
+      - FN_IOFS_DOCKER_PATH=${DOCKER_DIR}/iofs
+  fn-ui:
+    image: fnproject/ui:latest
+    restart: always
+    networks:
+      - default
+      - traefik_proxy
+    links:
+      - fn
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=fn-ui"
+      - "traefik.frontend.rule=Host:fn.${DOMAIN_NAME}"
+      - "traefik.port=4000"
+      - "traefik.docker.network=traefik_proxy"
+    environment:
+      - FN_API_URL=http://fn:8080
+
+#endregion
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge
