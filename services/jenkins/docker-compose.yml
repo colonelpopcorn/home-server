@@ -1,12 +1,21 @@
 version: "3"
 services:
-
-#region Development Services
-
-# Jenkins CI - Docker powered, blue ocean, teenaged CI daydream.
-
+  #region Jenkins CI - Docker powered, blue ocean, teenaged CI daydream.
+  jenkins:
+    image: jenkins/jenkins:lts-alpine
+    restart: always
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=jenkins"
+      - "traefik.frontend.rule=Host:jenkins.${DOMAIN_NAME}"
+      - "traefik.port=8080"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_DIR}/jenkins_home/data:/jenkins_home
 #endregion
-
 networks:
   traefik_proxy:
     external:
