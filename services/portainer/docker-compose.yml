@@ -1,0 +1,29 @@
+version: "3"
+services:
+  #region Management Services
+  # Portainer - WebUI for Containers
+  portainer:
+    image: portainer/portainer
+    restart: always
+    command: --templates http://templates/templates.json
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=portainer"
+      - "traefik.frontend.rule=Host:portainer.${DOMAIN_NAME}"
+      - "traefik.port=9000"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_DIR}/portainer/data:/data
+      - ${DOCKER_DIR}/shared:/shared
+    environment:
+      - TZ=${TZ}
+      - PORTAINER_PASS=${PORTAINER_PASS}
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge

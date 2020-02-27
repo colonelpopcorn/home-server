@@ -1,0 +1,15 @@
+version: "3"
+services:
+
+#region Development Services
+
+# Jenkins CI - Docker powered, blue ocean, teenaged CI daydream.
+
+#endregion
+
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge
