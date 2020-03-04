@@ -1,4 +1,4 @@
-version: "3"
+version: "2"
 services:
   #region Jenkins CI - Docker powered, blue ocean, teenaged CI daydream.
   jenkins:
@@ -12,6 +12,7 @@ services:
       - "traefik.frontend.rule=Host:jenkins.${DOMAIN_NAME}"
       - "traefik.port=8080"
       - "traefik.docker.network=traefik_proxy"
+      - "com.centurylinklabs.watchower.enable=false"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${DOCKER_DIR}/jenkins_home/data:/jenkins_home
