@@ -1,4 +1,4 @@
-version: "3"
+version: "2"
 services:
   #region Management Services
   # Portainer - WebUI for Containers

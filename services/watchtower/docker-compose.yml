@@ -1,4 +1,4 @@
-version: "3"
+version: "2"
 services:
   #region Watchtower - Automatic Update of Containers/Apps
   watchtower:

@@ -1,5 +1,5 @@
 # Base overlay network - for routing
-version: "3"
+version: "2"
 services:
   scratch:
     image: scratch
