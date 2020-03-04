@@ -1,0 +1,27 @@
+version: "2"
+services:
+  #region huginn - iftt thingy
+  huginn:
+    image: huginn/huginn
+    restart: always
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=huginn"
+      - "traefik.frontend.rule=Host:huginn.${DOMAIN_NAME}"
+      - "traefik.port=3000"
+      - "traefik.docker.network=traefik_proxy"
+    environment:
+      - HUGINN_DATABASE_NAME=huginn
+      - HUGINN_DATABASE_USERNAME=huginn
+      - HUGINN_DATABASE_PASSWORD=${HUGINN_DB_PASS}
+      - HUGINN_DATABASE_HOST=${HUGINN_DB_HOST}
+      - HUGINN_DATABASE_PORT=3306
+  #endregion
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge
