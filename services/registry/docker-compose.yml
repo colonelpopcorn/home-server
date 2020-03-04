@@ -1,0 +1,38 @@
+version: "2"
+services:
+  #region registry server
+  registry-server:
+    image: registry
+    restart: always
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=registry-server"
+      - "traefik.frontend.rule=Host:registry-server.${DOMAIN_NAME}"
+      - "traefik.port=5000"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - ${DOCKER_DIR}/registry:/var/lib/registry
+  #endregion
+  #region registry ui
+  registry:
+    image: joxit/docker-registry-ui:latest
+    restart: always
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=registry"
+      - "traefik.frontend.rule=Host:registry.${DOMAIN_NAME}"
+      - "traefik.port=80"
+      - "traefik.docker.network=traefik_proxy"
+    environment:
+      - REGISTRY_URL=https://registry.${DOMAIN_NAME}
+  #endregion
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge
