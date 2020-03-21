@@ -9,8 +9,5 @@ services:
     command: --schedule "0 0 4 * * *" --cleanup
   #endregion
 networks:
-  traefik_proxy:
-    external:
-      name: traefik_proxy
   default:
     driver: bridge
