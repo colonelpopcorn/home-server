@@ -12,7 +12,7 @@ services:
       - traefik_proxy
     command:
       # Globals
-      - "--log.level=ERROR"
+      - "--log.level=DEBUG"
       - "--api=true"
       - "--global.sendAnonymousUsage=false"
       # Docker
