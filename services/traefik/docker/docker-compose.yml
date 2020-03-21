@@ -28,8 +28,8 @@ services:
       - "--certificatesresolvers.mydnschallenge.acme.dnschallenge.provider=cloudflare"
       - "--certificatesresolvers.mydnschallenge.acme.storage=/etc/traefik/acme.json"
     ports:
-      - "30085:80"
-      - "30445:443"
+      - "30080:80"
+      - "30443:443"
     environment:
       - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
       - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
