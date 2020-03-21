@@ -1,5 +1,5 @@
 # traefik - Main proxy server, this the goods kids.
-version: '3'
+version: "3"
 services:
   traefik:
     hostname: traefik
@@ -30,7 +30,7 @@ services:
     ports:
       - "30085:80"
       - "30445:443"
-     environment:
+    environment:
       - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
       - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
     volumes:
