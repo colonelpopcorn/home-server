@@ -15,18 +15,10 @@ services:
       - ${DOCKER_DIR}/portainer:/data
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.portainer.entrypoints=http"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
       - "traefik.http.routers.portainer.rule=Host(`portainer.${DOMAIN_NAME}`)"
-      - "traefik.http.middlewares.portainer-https-redirect.redirectscheme.scheme=http"
-      - "traefik.http.routers.portainer.middlewares=portainer-https-redirect"
-      - "traefik.http.routers.portainer-secure.entrypoints=https"
-      - "traefik.http.routers.portainer-secure.rule=Host(`portainer.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.portainer-secure.tls=true"
-      - "traefik.http.routers.portainer-secure.tls.certresolver=mydnschallenge"
-      - "traefik.http.routers.portainer-secure.service=portainer"
+      - "traefik.http.routers.portainer.tls.certresolver=mydnschallenge"
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
-      - "traefik.docker.network=traefik_proxy"
-
 networks:
   traefik_proxy:
     external: true
