@@ -21,9 +21,9 @@ services:
     environment:
       - GUACD_HOSTNAME=guacd
       - MYSQL_HOSTNAME=${MYSQL_HOST}
-      - MYSQL_DATABASE=${MYSQL_DB}
+      - MYSQL_DATABASE=guacamole
       - MYSQL_PORT=3306
-      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_USER=guacamole
       - MYSQL_PASSWORD=${MYSQL_PASS}
       - GUACAMOLE_HOME=/guacamole
     image: guacamole/guacamole
