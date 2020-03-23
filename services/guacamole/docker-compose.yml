@@ -2,7 +2,7 @@ version: "2"
 services:
   #region Guacamole - RDP client for accessing compute resources inside the network
   guacamole:
-    containername: guacamole
+    container_name: guacamole
     depends_on:
       - guacd
     links:
@@ -32,7 +32,7 @@ services:
     restart: always
   guacd:
     hostname: guacd
-    containername: guacd
+    container_name: guacd
     image: guacamole/guacd
     networks:
       - default
