@@ -2,6 +2,7 @@ version: "2"
 services:
   #region Watchtower - Automatic Update of Containers/Apps
   watchtower:
+    container_name: watchtower
     restart: always
     image: v2tec/watchtower
     volumes:
