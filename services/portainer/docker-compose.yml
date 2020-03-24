@@ -16,9 +16,12 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.routers.portainer.middlewares=portainer-whitelist"
       - "traefik.http.routers.portainer.rule=Host(`portainer.${DOMAIN_NAME}`)"
       - "traefik.http.routers.portainer.tls.certresolver=mydnschallenge"
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.middlewares.portainer-whitelist.ipwhitelist.sourcerange=192.168.2.0/24, 34.226.137.157"
+
 networks:
   traefik_proxy:
     external: true

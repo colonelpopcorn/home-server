@@ -2,6 +2,7 @@ version: "2"
 services:
   #region Guacamole - RDP client for accessing compute resources inside the network
   guacamole:
+    container_name: guacamole
     depends_on:
       - guacd
     links:
@@ -11,16 +12,18 @@ services:
       - traefik_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.guacamole.backend=guacamole"
-      - "traefik.guacamole.frontend.rule=Host:guacamole.${DOMAIN_NAME}"
-      - "traefik.guacamole.port=8080"
-      - "traefik.docker.network=traefik_proxy"
+      - "traefik.http.routers.guacamole.entrypoints=websecure"
+      - "traefik.http.routers.guacamole.middlewares=guacamole-whitelist"
+      - "traefik.http.routers.guacamole.rule=Host(`guacamole.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.guacamole.tls.certresolver=mydnschallenge"
+      - "traefik.http.services.guacamole.loadbalancer.server.port=8080"
+      - "traefik.http.middlewares.guacamole-whitelist.ipwhitelist.sourcerange=192.168.2.0/24, 192.168.1.0/24, 34.226.137.157"
     environment:
       - GUACD_HOSTNAME=guacd
       - MYSQL_HOSTNAME=${MYSQL_HOST}
-      - MYSQL_DATABASE=${MYSQL_DB}
+      - MYSQL_DATABASE=guacamole
       - MYSQL_PORT=3306
-      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_USER=guacamole
       - MYSQL_PASSWORD=${MYSQL_PASS}
       - GUACAMOLE_HOME=/guacamole
     image: guacamole/guacamole
@@ -29,6 +32,7 @@ services:
     restart: always
   guacd:
     hostname: guacd
+    container_name: guacd
     image: guacamole/guacd
     networks:
       - default
