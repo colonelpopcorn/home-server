@@ -41,10 +41,6 @@ services:
       - "traefik.http.routers.fn-ui.tls.certresolver=mydnschallenge"
       - "traefik.http.services.fn-ui.loadbalancer.server.port=4000"
       - "traefik.http.middlewares.fn-ui-whitelist.ipwhitelist.sourcerange=192.168.1.0/24, 34.226.137.157"
-      - "traefik.backend=fn-ui"
-      - "traefik.frontend.rule=Host:fn.${DOMAIN_NAME}"
-      - "traefik.port=4000"
-      - "traefik.docker.network=traefik_proxy"
     environment:
       - FN_API_URL=http://fn:8080
 
