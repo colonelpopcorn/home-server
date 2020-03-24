@@ -17,7 +17,7 @@ services:
       - "traefik.http.routers.guacamole.rule=Host(`guacamole.${DOMAIN_NAME}`)"
       - "traefik.http.routers.guacamole.tls.certresolver=mydnschallenge"
       - "traefik.http.services.guacamole.loadbalancer.server.port=8080"
-      - "traefik.http.middlewares.guacamole-whitelist.ipwhitelist.sourcerange=192.168.2.0/24, 192.168.1.0/24, 34.226.137.157"
+      - "traefik.http.middlewares.guacamole-whitelist.ipwhitelist.sourcerange=192.168.1.0/24, 34.226.137.157"
     environment:
       - GUACD_HOSTNAME=guacd
       - MYSQL_HOSTNAME=${MYSQL_HOST}
