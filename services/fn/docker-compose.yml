@@ -16,7 +16,8 @@ services:
       - "traefik.http.routers.fn-server.rule=Host(`fn-server.${DOMAIN_NAME}`)"
       - "traefik.http.routers.fn-server.tls.certresolver=mydnschallenge"
       - "traefik.http.services.fn-server.loadbalancer.server.port=8080"
-      - "traefik.http.middlewares.fn-server-whitelist.ipwhitelist.sourcerange=192.168.1.0/24, 34.226.137.157"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.http.middlewares.fn-server-whitelist.ipwhitelist.sourcerange=${IP_WHITELIST}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${DOCKER_DIR}/iofs:/iofs
