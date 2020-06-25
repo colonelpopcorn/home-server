@@ -1,0 +1,12 @@
+version: "2"
+
+services:
+  terraria:
+    image: beardedio/terraria:vanilla-latest
+    ports:
+      - "7777:7777"
+    restart: unless-stopped
+    volumes:
+      - $DOCKER_DIR/terraria/config:/config
+    tty: true
+    stdin_open: true
