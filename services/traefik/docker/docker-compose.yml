@@ -19,11 +19,13 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      # File provider
+      - "--providers.file.directory=${DOCKER_DIR}/traefik/rules"
+      - "--providers.file.watch=true"
       # Entrypoints
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       # LetsEncrypt
-      # - "--certificatesresolvers.mydnschallenge.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory"
       - "--certificatesresolvers.mydnschallenge.acme.email=${CLOUDFLARE_EMAIL}"
       - "--certificatesresolvers.mydnschallenge.acme.dnschallenge.provider=cloudflare"
       - "--certificatesresolvers.mydnschallenge.acme.storage=/etc/traefik/acme.json"
@@ -39,20 +41,20 @@ services:
     labels:
       # API
       - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.middlewares=traefik-whitelist"
       - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.traefik.tls.certresolver=mydnschallenge"
       - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-      - "traefik.http.services.traefik.loadbalancer.server.scheme=http"
+      - "traefik.http.middlewares.traefik-whitelist.ipwhitelist.sourcerange=${IP_WHITELIST}"
       # Wildcard cert
       - "traefik.http.routers.traefik.tls.domains[0].main=${DOMAIN_NAME}"
       - "traefik.http.routers.traefik.tls.domains[0].sans=*.${DOMAIN_NAME}"
-      - "traefik.http.routers.traefik.tls.certresolver=mydnschallenge"
-      - "traefik.http.routers.traefik.middlewares=traefik-whitelist"
       # Global http-->https
       - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:[a-z-.]+}`)"
       - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.traefik-whitelist.ipwhitelist.sourcerange=192.168.1.0/24, 34.226.137.157"
 networks:
   traefik_proxy:
     external:
