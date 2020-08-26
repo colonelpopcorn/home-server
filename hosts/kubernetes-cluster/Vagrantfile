@@ -1,0 +1,36 @@
+Vagrant.configure("2") do |config|
+
+  config.ssh.forward_agent = true
+  N = 2
+  (0..N).each do |machine_id|
+    if machine_id == N
+      machine_name = "kube-manager"
+    else
+      machine_name = "kube-worker-#{machine_id+1}"
+    end
+    config.vm.define machine_name do |machine|
+      machine.vm.box = "ubuntu/bionic64"
+      machine.vm.hostname = machine_name
+      machine.vm.network "private_network", ip: "10.0.5.#{10+machine_id}"
+
+      if machine_id == N
+        provisioner = Vagrant::Util::Platform.windows? ? :guest_ansible : :ansible
+        machine.vm.provision provisioner do |ansible|
+          ansible.limit = "all"
+          ansible.become = true
+          ansible.groups = {
+            "manager" => ["kube-manager"],
+            "worker" => ["kube-worker-1", "kube-worker-2"],
+            "manager:vars" => {
+              "kube_role" => "manager"
+            },
+            "worker:vars" => {
+              "kube_role" => "worker"
+            }
+          }
+          ansible.playbook = "bootstrap.yml"
+        end
+      end
+    end
+  end
+end
