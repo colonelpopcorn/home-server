@@ -1,0 +1,49 @@
+---
+- hosts: all
+  tasks:
+    - name: Set the hostname
+      hostname:
+        name: plex-server
+    - name: Add plex key
+      apt_key:
+        url: https://downloads.plex.tv/plex-keys/PlexSign.key
+        state: present
+    - name: Add repository for plex
+      apt_repository:
+        repo: deb https://downloads.plex.tv/repo/deb public main
+        state: present
+    - name: Install Plex
+      apt:
+        pkg:
+          - apt-transport-https
+          - plexmediaserver
+          - cifs-utils
+          - nfs-common
+        update_cache: yes
+        state: present
+    - name: Stop plex
+      service:
+        name: plexmediaserver
+        state: stopped
+    - name: Modify plex user
+      user:
+        name: plex
+        uid: 9999
+        group: users
+    - name: Start plex
+      service:
+        name: plexmediaserver
+        state: started
+    - name: Create a directory if it does not exist
+      file:
+        path: /mnt/Media
+        state: directory
+        mode: '0775'
+        recurse: yes
+        owner: plex
+    - name: Mount media share
+      mount:
+        fstype: nfs
+        state: mounted
+        src: "192.168.1.35:/export/Media"
+        path: "/mnt/Media"
