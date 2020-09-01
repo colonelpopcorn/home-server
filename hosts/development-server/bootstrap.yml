@@ -1,0 +1,47 @@
+---
+- hosts: all
+  vars:
+    bind_addr: 0.0.0.0
+    bind_port: 8080
+    code_dir: /var/lib/code-server
+    user: vagrant
+    password: vagrant
+    code_server_version: 3.5.0
+  tasks:
+    - name: Set the hostname
+      hostname:
+        name: code-server
+    - name: Download and unarchive code-server
+      unarchive:
+        src: "https://github.com/cdr/code-server/releases/download/v{{ code_server_version }}/code-server-{{ code_server_version }}-linux-x86_64.tar.gz"
+        dest: /usr/lib
+        remote_src: yes
+    - name: Create a symbolic link for code-server
+      file:
+        src: "/usr/lib/code-server-{{ code_server_version }}-linux-x86_64/code-server"
+        dest: /usr/bin/code-server
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        state: link
+    - name: Create a directory to hold code
+      file:
+        path: "{{ code_dir }}"
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        state: directory
+    - name: Copy systemd config for code-server
+      template:
+        src: code-server.service.j2
+        dest: /lib/systemd/system/code-server.service
+    - name: Give user permission to use code-server
+      file:
+        path: "/usr/lib/code-server-{{ code_server_version }}-linux-x86_64"
+        state: directory
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        recurse: yes
+    - name: Start and enable code-server
+      systemd:
+        name: code-server
+        state: started
+        enabled: yes
