@@ -1,0 +1,26 @@
+version: '2'
+services:
+  firefly:
+    image: jc5x/firefly-iii:latest
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.firefly_iii.entrypoints=websecure"
+      - "traefik.http.routers.firefly_iii.middlewares=firefly_iii-whitelist"
+      - "traefik.http.routers.firefly_iii.rule=Host(`budget.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.firefly_iii.tls.certresolver=mydnschallenge"
+      - "traefik.http.services.firefly_iii.loadbalancer.server.port=8080"
+      - "traefik.http.middlewares.firefly_iii-whitelist.ipwhitelist.sourcerange=${IP_WHITELIST}"
+    environment:
+      - APP_KEY
+      - DB_HOST
+      - DB_PORT
+      - DB_CONNECTION
+      - DB_DATABASE
+      - DB_USERNAME
+      - DB_PASSWORD
+    volumes:
+      - ${DOCKER_DIR}/firefly_iii/export:/var/www/firefly-iii/storage/export
+      - ${DOCKER_DIR}/firefly_iii/upload:/var/www/firefly-iii/storage/upload \
+    environment:
+      - POSTGRES_PASSWORD
