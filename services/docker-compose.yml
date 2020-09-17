@@ -1,0 +1,19 @@
+version: "2"
+
+services:
+  whoami:
+    image: "containous/whoami"
+    container_name: "simple-service"
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.firefly.entrypoints=websecure"
+      - "traefik.http.routers.firefly.rule=Host(`budget.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.firefly.tls.certresolver=mydnschallenge"
+      - "traefik.http.services.firefly.loadbalancer.server.port=80"
+      - "traefik.docker.network=traefik_proxy"
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
