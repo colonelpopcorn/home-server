@@ -3,24 +3,30 @@ services:
   firefly:
     image: jc5x/firefly-iii:latest
     restart: always
+    networks:
+      - traefik_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.firefly_iii.entrypoints=websecure"
-      - "traefik.http.routers.firefly_iii.middlewares=firefly_iii-whitelist"
-      - "traefik.http.routers.firefly_iii.rule=Host(`budget.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.firefly_iii.tls.certresolver=mydnschallenge"
-      - "traefik.http.services.firefly_iii.loadbalancer.server.port=8080"
-      - "traefik.http.middlewares.firefly_iii-whitelist.ipwhitelist.sourcerange=${IP_WHITELIST}"
+      - "traefik.http.routers.firefly.entrypoints=websecure"
+      - "traefik.http.routers.firefly.rule=Host(`budget.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.firefly.tls.certresolver=mydnschallenge"
+      - "traefik.http.services.firefly.loadbalancer.server.port=8080"
+      - "traefik.http.middlewares.firefly.headers.customrequestheaders.sslProxyHeaders=https"
+      - "traefik.docker.network=traefik_proxy"
     environment:
       - APP_KEY
       - DB_HOST
-      - DB_PORT
-      - DB_CONNECTION
-      - DB_DATABASE
-      - DB_USERNAME
       - DB_PASSWORD
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_NAMESPACE}
+      - DB_USERNAME=${DB_NAMESPACE}
+      - DB_CONNECTION=mysql
+      - APP_URL=https://budget.${DOMAIN_NAME}
+      - TRUSTED_PROXIES=**
     volumes:
-      - ${DOCKER_DIR}/firefly_iii/export:/var/www/firefly-iii/storage/export
-      - ${DOCKER_DIR}/firefly_iii/upload:/var/www/firefly-iii/storage/upload \
-    environment:
-      - POSTGRES_PASSWORD
+      - ${DOCKER_DIR}/firefly/export:/var/www/firefly-iii/storage/export
+      - ${DOCKER_DIR}/firefly/upload:/var/www/firefly-iii/storage/upload
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
