@@ -1,0 +1,16 @@
+kube-manager ansible_connection=local
+kube-worker-1      ansible_host=10.0.5.10 ansible_ssh_private_key_file=/vagrant/.vagrant/machines/kube-worker-1/virtualbox/private_key
+kube-worker-2      ansible_host=10.0.5.11 ansible_ssh_private_key_file=/vagrant/.vagrant/machines/kube-worker-2/virtualbox/private_key
+
+[manager]
+kube-manager
+
+[manager:vars]
+kube_role=manager
+
+[worker]
+kube-worker-[1:2]
+
+[worker:vars]
+kube_role=worker
+
