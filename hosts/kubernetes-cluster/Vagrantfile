@@ -14,7 +14,8 @@ Vagrant.configure("2") do |config|
       machine.vm.network "private_network", ip: "10.0.5.#{10+machine_id}"
 
       if machine_id == N
-        provisioner = Vagrant::Util::Platform.windows? ? :guest_ansible : :ansible
+        provisioner = Vagrant::Util::Platform.windows? ? :ansible_local : :ansible
+        # TODO: Write an inventory file if we're on Windows
         machine.vm.provision provisioner do |ansible|
           ansible.limit = "all"
           ansible.become = true
