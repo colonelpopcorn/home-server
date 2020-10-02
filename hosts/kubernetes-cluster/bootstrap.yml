@@ -1,0 +1,27 @@
+---
+- hosts: all
+  tasks:
+    - name: Download k3s install script
+      command: >
+        curl -sfL -o ${HOME}/k3s.sh https://get.k3s.io
+    - name: Make shell script executable
+      file:
+        dest: ${HOME}/k3s.sh
+        mode: a+x
+    - name: Install k3s
+      command: ${HOME}/k3s.sh --disable-traefik
+    - name: "Get join token from manager"
+      command: >
+        cat /var/lib/rancher/k3s/server/node-token
+      run_once: True
+      changed_when: False
+      register: k3s_join_token
+      when: k3s_role == 'manager'
+    - name: "Join worker to manager"
+      command: >
+        k3s agent --server {{ k3s_advertise_address }}:{{ k3s_advertise_port }}
+        --token {{ k3s_join_token.stdout }}
+      when: k3s_role == 'worker'
+  vars:
+    k3s_advertise_address: 10.0.5.12
+    k3s_advertise_port: 6443

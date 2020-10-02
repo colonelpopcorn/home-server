@@ -9,7 +9,7 @@ http:
       middlewares:
         - "code-server-whitelist"
       service: code-server-service
-      rule: Host(`code.linghome.net`)
+      rule: Host(`code.example.com`)
 
   # Add the middleware
   middlewares:
