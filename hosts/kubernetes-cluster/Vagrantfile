@@ -8,32 +8,29 @@ Vagrant.configure("2") do |config|
       machine.vm.box = "ubuntu/bionic64"
       machine.vm.hostname = machine_name
       machine.vm.network "private_network", ip: "10.0.5.#{10+machine_id}"
+      machine.vm.provision "shell" do |s|
+        s.inline = <<-SHELL
+          sudo cp /vagrant/sshd_config /etc/ssh/sshd_config
+          sudo service sshd restart
+        SHELL
+      end
       
       if machine_id == N
-        ssh_key = File.readlines("#{Dir.home}/.ssh/vagrant_machine_key").first.strip
         machine.vm.provision "shell" do |s|
           s.inline = <<-SHELL
-            echo #{ssh_key} >> /home/vagrant/.ssh/id_rsa
-            chown vagrant /home/vagrant/.ssh/id_rsa
-            chmod 400 /home/vagrant/.ssh/id_rsa
+            sudo mkdir /etc/ansible
+            sudo cp /vagrant/ansible.cfg /etc/ansible/ansible.cfg
           SHELL
-          (0..(N-1)).each do |machine_id|
-            s.inline = <<-SHELL
-              ssh-copy-id -i /home/vagrant/.ssh/id_rsa vagrant@10.0.5.#{10+machine_id}
-            SHELL
-          end
         end
         if Vagrant::Util::Platform.windows?
           machine.vm.provision :ansible_local do |ansible|
             ansible.playbook = "bootstrap.yml"
-            ansible.verbose = true
             ansible.install = true
             ansible.become = true
             ansible.limit = "all"
             ansible.inventory_path = "win_inventory"
-            ansible.raw_arguments = [
-              "--private-key=#{Dir.home}/.ssh/vagrant_machine_key"
-            ]
+            ansible.galaxy_role_file = "requirements.yml"
+            ansible.extra_vars = { ansible_python_interpreter:"/usr/bin/python3" }
           end
         else
           machine.vm.provision :ansible do |ansible|
@@ -49,10 +46,8 @@ Vagrant.configure("2") do |config|
                 "kube_role" => "worker"
               }
             }
-            ansible.raw_arguments = [
-              "--private-key=#{Dir.home}/.ssh/vagrant_machine_key"
-            ]
             ansible.playbook = "bootstrap.yml"
+            ansible.galaxy_role_file = "requirements.yml"
           end
         end
       end
