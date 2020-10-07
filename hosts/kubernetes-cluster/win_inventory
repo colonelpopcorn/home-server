@@ -3,14 +3,12 @@ kube-manager ansible_connection=local
 kube-worker-1 ansible_host=10.0.5.10 ansible_user=vagrant ansible_password=vagrant
 kube-worker-2 ansible_host=10.0.5.11 ansible_user=vagrant ansible_password=vagrant
 
-[manager]
+[all:vars]
+k3s_advertise_addr=10.0.5.12
+k3s_advertise_port=6443
+
+[managers]
 kube-manager
 
-[manager:vars]
-k3s_role=manager
-
-[worker]
+[workers]
 kube-worker-[1:2]
-
-[worker:vars]
-k3s_role=worker

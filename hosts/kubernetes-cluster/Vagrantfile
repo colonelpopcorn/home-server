@@ -1,5 +1,8 @@
 Vagrant.configure("2") do |config|
-
+  hosts_map = {
+    "managers" => ["kube-manager"],
+    "workers" => ["kube-worker-1", "kube-worker-2"],
+  }
   config.ssh.forward_agent = true
   N = 2
   (0..N).each do |machine_id|
@@ -29,25 +32,14 @@ Vagrant.configure("2") do |config|
             ansible.become = true
             ansible.limit = "all"
             ansible.inventory_path = "win_inventory"
-            ansible.galaxy_role_file = "requirements.yml"
             ansible.extra_vars = { ansible_python_interpreter:"/usr/bin/python3" }
           end
         else
           machine.vm.provision :ansible do |ansible|
             ansible.limit = "all"
             ansible.become = true
-            ansible.groups = {
-              "manager" => ["kube-manager"],
-              "worker" => ["kube-worker-1", "kube-worker-2"],
-              "manager:vars" => {
-                "kube_role" => "manager"
-              },
-              "worker:vars" => {
-                "kube_role" => "worker"
-              }
-            }
+            ansible.groups = hosts_map
             ansible.playbook = "bootstrap.yml"
-            ansible.galaxy_role_file = "requirements.yml"
           end
         end
       end

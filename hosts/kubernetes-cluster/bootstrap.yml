@@ -1,17 +1,19 @@
 ---
-- hosts: all
-  pre_tasks:
-    - name: Install pip
-      apt:
-        pkg: python3-pip
-        state: present
-        update_cache: yes
-    - name: Install jmespath
-      pip:
-        name: jmespath >= 0.9.0
-        executable: pip3
-  roles:
-    - xanmanning.k3s
-  vars:
-    k3s_use_docker: true
-    k3s_no_traefik: true
+- hosts: managers
+  tasks:
+    - name: Install k3s server
+      shell: >
+        curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable=traefik" sh -s -
+    - name: Get join token from server
+      command: >
+        cat /var/lib/rancher/k3s/server/node-token
+      run_once: True
+      changed_when: False
+      register: k3s_join_token
+- hosts: workers
+  tasks:
+    - name: Install k3s agents
+      shell: >
+        curl -sfL https://get.k3s.io | \ 
+        K3S_URL=https://{{ k3s_advertise_addr }}:{{ k3s_advertise_port }} \
+        K3S_TOKEN={{ hostvars['kube-manager']['k3s_join_token'].stdout }} sh -s -
