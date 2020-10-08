@@ -3,7 +3,8 @@
   tasks:
     - name: Install k3s server
       shell: >
-        curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable=traefik" sh -s -
+        curl -sfL https://get.k3s.io | \
+        INSTALL_K3S_EXEC="--disable=traefik --node-external-ip={{ k3s_advertise_addr }}" sh -s -
     - name: Get join token from server
       command: >
         cat /var/lib/rancher/k3s/server/node-token
