@@ -1,8 +1,6 @@
 additionalArguments:
-  - "--certificatesresolvers.letsencrypt.acme.email=jonathanling@shamrocksweb.com"
+  - "--certificatesresolvers.letsencrypt.acme.email=${CLOUDFLARE_EMAIL}"
   - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
-  - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
-  - "--certificatesResolvers.letsencrypt.acme.dnschallenge=true"
   - "--certificatesResolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
   - "--api.insecure=true"
   - "--accesslog=true"
