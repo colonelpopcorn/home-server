@@ -2,6 +2,8 @@ additionalArguments:
   - "--certificatesresolvers.letsencrypt.acme.email=${CLOUDFLARE_EMAIL}"
   - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
   - "--certificatesResolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
+  - "--entrypoints.web.http.redirections.entrypoint.to=:443"
+  - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
   - "--api"
   - "--accesslog=true"
   - "--log.level=ERROR"
