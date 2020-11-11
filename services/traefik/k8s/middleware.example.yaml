@@ -6,6 +6,11 @@ metadata:
 spec:
   ipWhiteList:
     sourceRange:
-    {{ range $i, $ip := (ds "config").ips -}}
-      - {{ (print $ip) }}
-    {{ end }}
+      {{ range $i, $ip := (ds "config").sourceRange -}}
+        - {{ (print $ip) }}
+      {{ end }}
+    ipStrategy:
+      excludedIps:
+        {{ range $i, $ip := (ds "config").excludedIps -}}
+        - {{ (print $ip) }}
+        {{ end }}
