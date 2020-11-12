@@ -2,6 +2,15 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
+  name: basic-auth
+spec:
+  basicAuth:
+    secret: basic-auth-passwd
+# Gomplate template for ipWhitelist example
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
   name: home-to-me
 spec:
   ipWhiteList:

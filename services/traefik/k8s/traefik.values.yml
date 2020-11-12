@@ -4,7 +4,6 @@ additionalArguments:
   - "--certificatesResolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
   - "--entrypoints.web.http.redirections.entrypoint.to=:443"
   - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
-  - "--entryPoints.web.proxyProtocol.trustedIPs=127.0.0.1/32,192.168.1.0/24"
   - "--api"
   - "--accesslog=true"
   - "--log.level=ERROR"
