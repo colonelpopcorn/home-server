@@ -14,6 +14,7 @@ persistence:
 service:
   spec:
     externalTrafficPolicy: Cluster
+    loadBalancerIP: ${HOME_IP}
 env:
   - name: CF_DNS_API_TOKEN
     valueFrom:

@@ -1,13 +1,42 @@
+# This will allow traefik to "ingress" into the cluster which has access to other hosts
+# in the same network. Then, once we're in the cluster, traefik can "egress" out to access
+# another machine on the network that's not part of the cluster. This will help keep services
+# accessible until we can migrate the workloads into kubernetes.
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: ${EXTERNAL_SVC_NAME}
 spec:
-  type: ExternalName
   ports:
-    - name: http
+    - protocol: TCP
       port: 80
-      protocol: TCP
       targetPort: ${EXTERNAL_PORT}
-  externalName: ${EXTERNAL_IP}
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: ${EXTERNAL_SVC_NAME}
+subsets:
+  - addresses:
+      - ip: ${EXTERNAL_IP}
+    ports:
+      - port: ${EXTERNAL_PORT}
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ${EXTERNAL_SVC_NAME}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`${EXTERNAL_SVC_NAME}.${DOMAIN_NAME}`)
+    kind: Rule
+    services:
+    - name: ${EXTERNAL_SVC_NAME}
+      port: 80
+    middlewares:
+    - name: basic-auth
+  tls:
+    certResolver: letsencrypt
