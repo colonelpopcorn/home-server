@@ -4,9 +4,7 @@ services:
   portainer:
     image: portainer/portainer:latest
     container_name: portainer
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
+    restart: always
     networks:
       - traefik_proxy
     volumes:
@@ -21,7 +19,7 @@ services:
       - "traefik.http.routers.portainer.tls.certresolver=mydnschallenge"
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
       - "traefik.http.middlewares.portainer-whitelist.ipwhitelist.sourcerange=${IP_WHITELIST}"
-
+      - "traefik.docker.network=traefik_proxy"
 networks:
   traefik_proxy:
     external: true
