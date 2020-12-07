@@ -3,7 +3,7 @@ version: "3"
 services:
   traefik:
     hostname: traefik
-    image: traefik:v2.0
+    image: traefik:v2.3
     container_name: traefik
     restart: always
     domainname: ${DOMAIN_NAME}
@@ -15,6 +15,7 @@ services:
       - "--log.level=ERROR"
       - "--global.sendAnonymousUsage=false"
       - "--api"
+      - "--accesslog=true"
       # Docker
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
@@ -35,6 +36,9 @@ services:
     environment:
       - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
       - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
+      - CLOUDFLARE_POLLING_INTERVAL=6
+      - CLOUDFLARE_PROPAGATION_TIMEOUT=100
+      - CLOUDFLARE_HTTP_TIMEOUT=60
     volumes:
       - "${DOCKER_DIR}/traefik/acme.json:/etc/traefik/acme.json"
       - "${DOCKER_DIR}/traefik/rules:/etc/traefik/rules"
