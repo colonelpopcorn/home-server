@@ -3,14 +3,18 @@ services:
   #region Jenkins CI - Docker powered, blue ocean, teenaged CI daydream.
   jenkins:
     image: jenkins/jenkins:lts-alpine
+    container_name: jenkins
     restart: always
     networks:
       - traefik_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.backend=jenkins"
-      - "traefik.frontend.rule=Host:jenkins.${DOMAIN_NAME}"
-      - "traefik.port=8080"
+      - "traefik.http.routers.jenkins.entrypoints=websecure"
+      - "traefik.http.routers.jenkins.middlewares=jenkins-whitelist"
+      - "traefik.http.routers.jenkins.rule=Host(`jenkins.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.jenkins.tls.certresolver=mydnschallenge"
+      - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
+      - "traefik.http.middlewares.jenkins-whitelist.ipwhitelist.sourcerange=${IP_WHITELIST}"
       - "traefik.docker.network=traefik_proxy"
       - "com.centurylinklabs.watchower.enable=false"
     volumes:
@@ -21,5 +25,3 @@ networks:
   traefik_proxy:
     external:
       name: traefik_proxy
-  default:
-    driver: bridge
