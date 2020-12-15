@@ -1,0 +1,8 @@
+---
+- hosts: all
+  vars:
+    user: vagrant
+    password: vagrant
+    armVersion: v2_master
+  roles:
+    - jswetzen.automatic-ripping-machine
