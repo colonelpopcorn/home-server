@@ -2,7 +2,7 @@
 version: "3"
 services:
   portainer:
-    image: portainer/portainer:latest
+    image: portainer/portainer-ce:latest
     container_name: portainer
     restart: always
     networks:
@@ -13,10 +13,10 @@ services:
       - ${DOCKER_DIR}/portainer:/data
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.routers.portainer.entrypoints=https"
+      - "traefik.http.routers.portainer.tls=true"
       - "traefik.http.routers.portainer.middlewares=portainer-whitelist"
       - "traefik.http.routers.portainer.rule=Host(`portainer.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.portainer.tls.certresolver=mydnschallenge"
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
       - "traefik.http.middlewares.portainer-whitelist.ipwhitelist.sourcerange=${IP_WHITELIST}"
       - "traefik.docker.network=traefik_proxy"

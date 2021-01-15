@@ -9,10 +9,10 @@ services:
       - traefik_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.jenkins.entrypoints=websecure"
+      - "traefik.http.routers.jenkins.entrypoints=https"
+      - "traefik.http.routers.jenkins.tls=true"
       - "traefik.http.routers.jenkins.middlewares=jenkins-whitelist"
       - "traefik.http.routers.jenkins.rule=Host(`jenkins.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.jenkins.tls.certresolver=mydnschallenge"
       - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
       - "traefik.http.middlewares.jenkins-whitelist.ipwhitelist.sourcerange=${IP_WHITELIST}"
       - "traefik.docker.network=traefik_proxy"
