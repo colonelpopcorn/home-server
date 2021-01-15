@@ -2,6 +2,7 @@ version: '2'
 services:
   postgres:
     image: postgres
+    container_name: postgres
     restart: always
     ports:
       - 5432:5432
@@ -11,6 +12,7 @@ services:
       - POSTGRES_PASSWORD
   mariadb:
     image: mariadb
+    container_name: mariadb
     restart: always
     ports:
       - 3306:3306
@@ -20,7 +22,8 @@ services:
       - MYSQL_ROOT_PASSWORD
   adminer:
     image: adminer
+    container_name: adminer
     restart: always
     ports:
-      - 8080:8080
+      - 9090:8080
     
