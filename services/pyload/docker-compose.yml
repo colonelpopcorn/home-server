@@ -1,0 +1,16 @@
+---
+version: 2
+services:
+  pyload:
+    image: pyload/pyload
+    container_name: pyload
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - ${DOCKER_DIR}/pyload/config:/config
+      - ${DOCKER_DIR}/pyload/downloads:/downloads
+    ports:
+      - 8520:8000
+    restart: unless-stopped
