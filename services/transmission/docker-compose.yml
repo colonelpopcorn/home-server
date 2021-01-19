@@ -17,9 +17,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/transmission-vpn:/data
       - ${DOCKER_DIR}/shared:/shared
-      - ${DOCKER_DIR}/Downloads:/data/watch
-      - ${DOCKER_DIR}/Downloads/completed:/data/completed
-      - ${DOCKER_DIR}/Downloads/incomplete:/data/incomplete
     environment:
       - OPENVPN_PROVIDER=NORDVPN
       - OPENVPN_USERNAME=${TRANSMISSION_VPN_USERNAME}
