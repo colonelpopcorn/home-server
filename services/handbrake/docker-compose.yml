@@ -1,0 +1,16 @@
+version: '2'
+services:
+  handbrake:
+    container_name: handbrake
+    image: jlesage/handbrake
+    ports:
+      - "5800:5800"
+    environment:
+      - USER_ID=1000
+      - GROUP_ID=100
+      - TZ=America/New_York
+    volumes:
+      - "/docker/appdata/handbrake:/config:rw"
+      - "${DOCKER_DIR}/HandBrake/input:/storage:ro"
+      - "${DOCKER_DIR}/HandBrake/watch:/watch:rw"
+      - "${DOCKER_DIR}/HandBrake/output:/output:rw"
