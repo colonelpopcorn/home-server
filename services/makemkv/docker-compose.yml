@@ -1,0 +1,19 @@
+version: '2'
+services:
+  makemkv:
+    container_name: makemkv
+    image: jlesage/makemkv
+    ports:
+      - "5810:5800"
+    environment:
+      - USER_ID=1000
+      - GROUP_ID=100
+      - TZ=America/New_York
+    volumes:
+      - "/docker/appdata/makemkv:/config:rw"
+      - "${DOCKER_DIR}/MakeMKV/input:/storage:ro"
+      - "${DOCKER_DIR}/MakeMKV/output:/output:rw"
+    devices:
+      - "/dev/sr0:/dev/sr0"
+      - "/dev/sg2:/dev/sg2"
+    privileged: true
