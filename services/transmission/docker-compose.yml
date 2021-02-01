@@ -23,3 +23,5 @@ services:
       - OPENVPN_PASSWORD=${TRANSMISSION_VPN_PASSWORD}
       - TRANSMISSION_RPC_AUTHENTICATION_REQUIRED=false
       - LOCAL_NETWORK=${LOCAL_NETWORK}
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"

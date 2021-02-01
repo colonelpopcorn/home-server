@@ -1,8 +1,7 @@
----
-version: 2
+version: '2'
 services:
   pyload:
-    image: pyload/pyload
+    image: linuxserver/pyload
     container_name: pyload
     environment:
       - PUID=1000
@@ -13,4 +12,6 @@ services:
       - ${DOCKER_DIR}/pyload/downloads:/downloads
     ports:
       - 8520:8000
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
