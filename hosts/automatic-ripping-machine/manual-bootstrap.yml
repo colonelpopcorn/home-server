@@ -1,0 +1,98 @@
+---
+- hosts: all
+  vars:
+    user: arm
+    password: vagrant
+    armVersion: v2_master
+    ubuntuVersions:
+      "16": 'ppa:mc3man/xerus-media'
+      "18": 'ppa:mc3man/bionic-prop'
+      "20": 'ppa:mc3man/focal6'
+  tasks:
+    - name: Set the hostname
+      hostname:
+        name: "{{ vars.user }}"
+    - name: Setup group
+      group:
+        name: "{{ vars.user }}"
+        state: present
+    - name: Setup user
+      user:
+        name: "{{ vars.user }}"
+        comment: Automatic ripping machine user.
+        group: "{{ vars.user }}"
+        password: "{{ vars.password }}"
+    - name: Setup repos
+      apt_repository:
+        repo: "{{ item }}"
+      with_items:
+      - 'ppa:graphics-drivers/ppa'
+      - 'ppa:heyarje/makemkv-beta'
+      - 'ppa:stebbins/handbrake-releases'
+      - "{{ vars.ubuntuVersions[ansible_distribution_major_version] }}"
+    - name: Install dependencies
+      apt:
+        pkg:
+          - avahi-daemon
+          - ubuntu-drivers-common
+          - makemkv-bin
+          - makemkv-oss
+          - handbrake-cli
+          - libavcodec-extra
+          - abcde
+          - flac
+          - imagemagick
+          - glyrc
+          - cdparanoia
+          - at
+          - python3
+          - python3-pip
+          - libcurl4-openssl-dev
+          - libssl-dev
+          - libdvd-pkg
+          - default-jre-headless
+        update_cache: yes
+        state: present
+        notify:
+          - Reconfigure libdvd-pkg
+          - Mask graphical system daemons
+    - name: Create app directory
+      file:
+        path: "/opt/{{ vars.user }}"
+        state: directory
+    - name: Fetch app
+      git:
+        repo: 'https://github.com/automatic-ripping-machine/automatic-ripping-machine.git'
+        dest: "/opt/{{ vars.user }}"
+        version: "{{ vars.armVersion }}"
+    - name: Change permissions for app
+      file:
+        path: "/opt/{{ vars.user }}"
+        recurse: yes
+        owner: "{{ vars.user }}"
+        group: "{{ vars.user }}"
+        state: directory
+    - name: Install pip dependencies
+      pip:
+        requirements: "/opt/{{ vars.user }}/requirements.txt"
+    - name: Copy files
+      file:
+        
+        state: link
+      with_items:
+      - 
+    - name: Create links
+
+
+  handlers:
+    - name: Reconfigure libdvd-pkg
+      command: dpkg-reconfigure -fnoninteractive libdvd-pkg
+    - name: Mask graphical system daemons
+      systemd:
+        name: "{{ item }}"
+        masked: yes
+      with_items:
+      - sleep
+      - suspend
+      - hibernate
+      - hybrid-sleep
