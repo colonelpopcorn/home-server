@@ -1,0 +1,33 @@
+version: '2'
+services:
+  nextcloud:
+    image: nextcloud:21-fpm-alpine
+    depends_on:
+      - postgres
+    container_name: nextcloud
+    restart: always
+    networks:
+      - database
+    ports:
+      - 8950:80
+    volumes:
+      - ${DOCKER_DIR}/nextcloud/app:/var/www/html
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASS}
+      - POSTGRES_DATABASE=nextcloud
+      - POSTGRES_USER=postgres
+      - POSTGRES_HOST=postgres
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    networks:
+      - database
+    volumes:
+      - ${DOCKER_DIR}/nextcloud/postgresql:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASS}
+networks:
+  database:
+    external:
+      name: database
