@@ -1,0 +1,16 @@
+version: '2'
+services:
+  jdownloader2:
+    container_name: jdownloader2
+    image: jlesage/jdownloader-2
+    ports:
+      - "8520:5800"
+    environment:
+      - USER_ID=1000
+      - GROUP_ID=100
+      - TZ=America/New_York
+    volumes:
+      - "/docker/appdata/jdownloader-2:/config:rw"
+      - "${DOCKER_DIR}/JDownloader2/Downloads:/output:rw"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
