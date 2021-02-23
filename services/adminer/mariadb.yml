@@ -1,0 +1,16 @@
+version: '2'
+services:
+  mariadb:
+    image: mariadb
+    container_name: mariadb
+    restart: always
+    ports:
+      - 3306:3306
+    volumes:
+      - ${DOCKER_DIR}/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD
+networks:
+  database:
+    external:
+      name: database

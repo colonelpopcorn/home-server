@@ -1,29 +1,14 @@
 version: '2'
 services:
-  postgres:
-    image: postgres
-    container_name: postgres
-    restart: always
-    ports:
-      - 5432:5432
-    volumes:
-      - ${DOCKER_DIR}/postgresql:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_PASSWORD
-  mariadb:
-    image: mariadb
-    container_name: mariadb
-    restart: always
-    ports:
-      - 3306:3306
-    volumes:
-      - ${DOCKER_DIR}/mysql:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD
   adminer:
     image: adminer
+    networks:
+      - database
     container_name: adminer
     restart: always
     ports:
       - 9090:8080
-    
+networks:
+  database:
+    external:
+      name: database
