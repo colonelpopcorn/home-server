@@ -1,0 +1,25 @@
+http:
+  # Add the router
+  routers:
+    {{ (ds "config").serviceName }}-router:
+      tls: true
+      entryPoints:
+        - https
+      middlewares:
+        - "{{ (ds "config").serviceName }}-whitelist"
+      service: {{ (ds "config").serviceName }}-service
+      rule: Host(`{{ (ds "config").serviceName }}.linghome.net`)
+  # Add the middleware
+  middlewares:
+    {{ (ds "config").serviceName }}-whitelist:
+      ipWhiteList:
+        sourceRange:
+          {{ range $i, $ip := (ds "config").sourceRange -}}
+          - {{ (print $ip) }}
+          {{ end }}
+  # Add the service
+  services:
+    {{ (ds "config").serviceName }}-service:
+      loadBalancer:
+        servers:
+          - url: {{ (ds "config").url }}
