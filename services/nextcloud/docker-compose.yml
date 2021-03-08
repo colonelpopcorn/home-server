@@ -1,7 +1,7 @@
 version: '2'
 services:
   nextcloud:
-    image: nextcloud:21-fpm-alpine
+    image: nextcloud:21
     depends_on:
       - postgres
     container_name: nextcloud
