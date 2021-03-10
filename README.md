@@ -1,3 +1,3 @@
-# Home Kubernetes Cluster - WIP
+# Home IaC
 
-Trying to set up some automation scripts to quickly bootstrap a [Kubernetes](https://github.com/kubernetes/kubernetes) cluster with [Traefik](https://github.com/containous/traefik) as an ingress controller. I also want to put deployment manifests for common services in the scripts folder.
+Repository that holds my infrastructure-as-code definitions for services I run on my home hardware.
