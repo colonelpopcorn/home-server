@@ -1,0 +1,26 @@
+version: "3"
+services:
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: mailhog
+    restart: always
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mailhog.entrypoints=https"
+      - "traefik.http.routers.mailhog.tls=true"
+      - "traefik.http.routers.mailhog.middlewares=mailhog-whitelist"
+      - "traefik.http.routers.mailhog.rule=Host(`mailhog.${DOMAIN_NAME}`)"
+      - "traefik.http.services.mailhog.loadbalancer.server.port=8025"
+      - "traefik.http.middlewares.mailhog-whitelist.ipwhitelist.sourcerange=${IP_WHITELIST}"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - ${DOCKER_DIR}/mailhog:/mail
+    environment:
+      - MH_HOSTNAME=mailhog.$DOMAIN_NAME
+      - MH_STORAGE=maildir
+      - MH_MAILDIR_PATH=/mail
+networks:
+  traefik_proxy:
+    external: true
