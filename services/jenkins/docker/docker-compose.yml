@@ -7,7 +7,7 @@ services:
     ports:
       - "5885:8080"
     labels:
-      - "com.centurylinklabs.watchower.enable=false"
+      - "com.centurylinklabs.watchtower.monitor-only=true"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${DOCKER_DIR}/jenkins_home/data:/jenkins_home
