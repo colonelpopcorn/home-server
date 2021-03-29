@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: plex
   tasks:
     - name: Set the hostname
       hostname:
