@@ -30,13 +30,13 @@ Vagrant.configure("2") do |config|
             ansible.playbook = "bootstrap.yml"
             ansible.install = true
             ansible.become = true
-            ansible.limit = "all"
+            ansible.limit = ["managers", "workers"]
             ansible.inventory_path = "win_inventory"
             ansible.extra_vars = { ansible_python_interpreter:"/usr/bin/python3" }
           end
         else
           machine.vm.provision :ansible do |ansible|
-            ansible.limit = "all"
+            ansible.limit = ["managers", "workers"]
             ansible.become = true
             ansible.groups = hosts_map
             ansible.playbook = "bootstrap.yml"
