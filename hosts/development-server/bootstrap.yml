@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: code
   vars:
     bind_addr: 0.0.0.0
     bind_port: 8080
