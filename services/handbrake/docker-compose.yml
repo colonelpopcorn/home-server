@@ -9,10 +9,15 @@ services:
       - USER_ID=1000
       - GROUP_ID=100
       - TZ=America/New_York
+      - AUTOMATED_CONVERSION_PRESET=General/HQ 1080p30 Surround
+      - AUTOMATED_CONVERSION_PRESET_2=General/HQ 720p30 Surround
+      - AUTOMATED_CONVERSION_OUTPUT_SUBDIR=SAME_AS_SRC
+      - AUTOMATED_CONVERSION_OUTPUT_SUBDIR_2=SAME_AS_SRC
     volumes:
-      - "/docker/appdata/handbrake:/config:rw"
+      - "${DOCKER_DIR}/handbrake_appdata:/config:rw"
       - "${DOCKER_DIR}/HandBrake/input:/storage:ro"
       - "${DOCKER_DIR}/HandBrake/watch:/watch:rw"
+      - "${DOCKER_DIR}/HandBrake/watch2:/watch2:rw"
       - "${DOCKER_DIR}/HandBrake/output:/output:rw"
     labels:
-      - "com.centurylinklabs.watchtower.enable=false"
+      - "com.centurylinklabs.watchtower.monitor-only=true"
