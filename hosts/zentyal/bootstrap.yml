@@ -1,0 +1,37 @@
+---
+- hosts: all
+  vars:
+    zentyalVersion: 7.0
+  tasks:
+    - name: Add gnupg2 package
+      apt:
+        name: gnupg2
+        state: present
+        update_cache: yes
+    - name: Add apt key for zentyal
+      apt_key:
+        keyserver: keyserver.ubuntu.com
+        id: D7F87B2966EB736F
+    - name: Add gpg key for zentyal package repo
+      get_url:
+        url: "http://keys.zentyal.org/zentyal-{{ vars.zentyalVersion }}-packages.asc"
+        dest: /etc/apt/trusted.gpg.d/zentyal-packages.asc
+    - name: Add sources for zentyal packages
+      apt_repository:
+        repo: "{{ item }}"
+        state: present
+        filename: zentyal
+      with_items:
+        - "deb http://packages.zentyal.org/zentyal {{ vars.zentyalVersion }} main extra"
+        - "deb http://ppa.launchpad.net/oisf/suricata-stable/ubuntu focal main"
+    - name: Remove netplan package
+      apt:
+        name: netplan.io
+        state: absent
+        update_cache: yes
+    - name: Add zentyal package
+      apt:
+        name: zentyal
+        state: present
+        install_recommends: no
+        update_cache: yes
