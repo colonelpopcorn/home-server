@@ -2,6 +2,9 @@
 - hosts: all
   vars:
     zentyalVersion: 7.0
+    testUser: admin
+    salt: mysecretsalt
+    algorithm: sha512
   tasks:
     - name: Add gnupg2 package
       apt:
@@ -35,3 +38,10 @@
         state: present
         install_recommends: no
         update_cache: yes
+    - name: Add test user for zentyal
+      user:
+        name: "{{ vars.testUser }}"
+        password: "{{ vars.testUser | password_hash(vars.algorithm, vars.salt) }}"
+        groups:
+          - admin
+          - sudo
