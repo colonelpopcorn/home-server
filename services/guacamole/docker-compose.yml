@@ -1,6 +1,6 @@
-version: "2"
+version: "3"
 services:
-  #region Guacamole - RDP client for accessing compute resources inside the network
+  # region Guacamole - RDP client for accessing compute resources inside the network
   guacamole:
     container_name: guacamole
     depends_on:
@@ -12,21 +12,20 @@ services:
       - traefik_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.guacamole.entrypoints=websecure"
-      - "traefik.http.routers.guacamole.middlewares=guacamole-whitelist"
+      - "traefik.http.routers.guacamole.entrypoints=https"
+      - "traefik.http.routers.guacamole.tls=true"
       - "traefik.http.routers.guacamole.rule=Host(`guacamole.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.guacamole.tls.certresolver=mydnschallenge"
       - "traefik.http.services.guacamole.loadbalancer.server.port=8080"
       - "traefik.docker.network=traefik_proxy"
-      - "traefik.http.middlewares.guacamole-whitelist.ipwhitelist.sourcerange=${IP_WHITELIST}"
     environment:
       - GUACD_HOSTNAME=guacd
-      - MYSQL_HOSTNAME=${MYSQL_HOST}
+      - MYSQL_HOSTNAME=guacdb
       - MYSQL_DATABASE=guacamole
       - MYSQL_PORT=3306
       - MYSQL_USER=guacamole
       - MYSQL_PASSWORD=${MYSQL_PASS}
       - GUACAMOLE_HOME=/guacamole
+      - EXTENSIONS=auth-totp
     image: guacamole/guacamole
     volumes:
       - ${DOCKER_DIR}/guacamole:/guacamole
@@ -38,6 +37,19 @@ services:
     networks:
       - default
     restart: always
+  guacdb:
+    image: mariadb:latest
+    container_name: guacdb
+    restart: always
+    networks:
+      - default
+    environment:
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_USER=guacamole
+      - MYSQL_PASSWORD=${MYSQL_PASS}
+      - MYSQL_DATABASE=guacamole
+    volumes:
+      - ${DOCKER_DIR}/guacamole/mariadb:/var/lib/mysql
 #endregion
 networks:
   traefik_proxy:
