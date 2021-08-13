@@ -1,0 +1,31 @@
+version: "3"
+services:
+  oauth:
+    container_name: oauth
+    image: thomseddon/traefik-forward-auth:latest
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "auth.${DOMAIN_NAME}:10.0.5.30"
+      - "oauth.${DOMAIN_NAME}:10.0.5.30"
+    environment:
+      - PROVIDERS_OIDC_CLIENT_ID=${TRAEFIK_CLIENT_ID}
+      - PROVIDERS_OIDC_CLIENT_SECRET=${TRAEFIK_CLIENT_SECRET}
+      - PROVIDERS_OIDC_ISSUER_URL=https://auth.${DOMAIN_NAME}}/auth/realms/${REALM_NAMEs}
+      - COOKIE_DOMAIN=${DOMAIN_NAME}
+      - SECRET=foobar
+      - INSECURE_COOKIE=true
+      - AUTH_HOST=oauth.${DOMAIN_NAME}
+      - URL_PATH=/_oauth
+      - LOG_LEVEL=info
+      - LOG_FORMAT=text
+      - LIFETIME=2592000
+      - DEFAULT_PROVIDER=oidc
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.oauth.entrypoints=web"
+      - "traefik.http.routers.oauth.rule=Host(`oauth.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.oauth.service=oauth"
+      - "traefik.http.services.oauth.loadbalancer.server.port=4181"
+      - "traefik.http.routers.oauth.middlewares=middlewares-oauth@file"

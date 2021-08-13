@@ -1,34 +1,31 @@
----
-version: "3.7"
+version: "3"
 services:
-  keycloakdb:
+  postgres:
     image: postgres
     container_name: postgres
     volumes:
-      - /home/vagrant/postgres:/var/lib/postgresql/data
+      - ${DOCKER_DIR}/postgres_keycloak:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak
     environment:
       DB_VENDOR: POSTGRES
-      DB_ADDR: keycloakdb
+      DB_ADDR: postgres
       DB_DATABASE: keycloak
       DB_USER: keycloak
-      DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
       KEYCLOAK_USER: webmaster
       KEYCLOAK_PASSWORD: ${KEYCLOAK_PASSWORD}
       PROXY_ADDRESS_FORWARDING: "true"
-    ports:
-      - 8080:8080
     depends_on:
-      - keycloakdb
+      - postgres
     labels:
       - "traefik.http.routers.auth.rule=Host(`auth.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.auth.entrypoints=websecure"
+      - "traefik.http.routers.auth.entrypoints=https"
       - "traefik.http.services.auth.loadbalancer.server.port=8080"
       - "traefik.frontend.passHostHeader=true"

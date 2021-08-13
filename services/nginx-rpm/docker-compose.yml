@@ -1,14 +1,15 @@
 version: '3'
 services:
   nginx-rpm:
+    container_name: nginx-rpm
     image: 'jc21/nginx-proxy-manager:latest'
     restart: unless-stopped
     ports:
-      - '80:80'
-      - '81:81'
-      - '443:443'
+      - '30080:80'
+      - '30081:81'
+      - '30443:443'
     environment:
-      DB_MYSQL_HOST: "db"
+      DB_MYSQL_HOST: "nginx-rpm-db"
       DB_MYSQL_PORT: 3306
       DB_MYSQL_USER: "npm"
       DB_MYSQL_PASSWORD: ${DB_MYSQL_PASSWORD}
@@ -16,8 +17,9 @@ services:
     volumes:
       - ${DOCKER_DIR}/nginx-rpm/data:/data
       - ${DOCKER_DIR}/nginx-rpm/letsencrypt:/etc/letsencrypt
-  db:
-    image: 'jc21/mariadb-aria:latest'
+  nginx-rpm-db:
+    container_name: nginx-rpm-db
+    image: 'mariadb:latest'
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -25,4 +27,4 @@ services:
       MYSQL_USER: 'npm'
       MYSQL_PASSWORD: ${DB_MYSQL_PASSWORD}
     volumes:
-      - ${DOCKER_DIR}/nginx-rpm/data/mysql:/var/lib/mysql
+      - ${DOCKER_DIR}/nginx-rpm-db:/var/lib/mysql
