@@ -3,6 +3,8 @@ services:
   postgres:
     image: postgres
     container_name: postgres
+    networks:
+      - default
     volumes:
       - ${DOCKER_DIR}/postgres_keycloak:/var/lib/postgresql/data
     environment:
@@ -13,6 +15,9 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak
+    networks: 
+      - traefik_proxy
+      - default
     environment:
       DB_VENDOR: POSTGRES
       DB_ADDR: postgres
@@ -25,7 +30,15 @@ services:
     depends_on:
       - postgres
     labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.http.routers.auth.tls=true"
       - "traefik.http.routers.auth.rule=Host(`auth.${DOMAIN_NAME}`)"
       - "traefik.http.routers.auth.entrypoints=https"
       - "traefik.http.services.auth.loadbalancer.server.port=8080"
-      - "traefik.frontend.passHostHeader=true"
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge
