@@ -1,0 +1,20 @@
+version: "2"
+
+services:
+  nexus-init:
+    container_name: nexus-init
+    restart: 'no'
+    image: alpine
+    command: chown 200:200 /nexus-data
+    volumes:
+      - ${DOCKER_DIR}/nexus-data:/nexus-data
+  nexus:
+    container_name: nexus-repo
+    restart: unless-stopped
+    image: sonatype/nexus3
+    depends_on:
+      - nexus-init
+    volumes:
+      - ${DOCKER_DIR}/nexus-data:/nexus-data
+    ports:
+      - "8081:8081"
