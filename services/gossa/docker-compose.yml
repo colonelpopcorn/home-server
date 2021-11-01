@@ -1,0 +1,16 @@
+version: '3'
+services:
+  pyload:
+    image: pldubouilh/gossa
+    container_name: gossa
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - ${DOCKER_DIR}:/shared
+    ports:
+      - 38001:8001
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+    restart: unless-stopped
