@@ -1,32 +1,38 @@
-version: '2'
+version: '3'
+
 services:
-  nextcloud:
-    image: nextcloud:21
-    depends_on:
-      - postgres
-    container_name: nextcloud
-    restart: always
+  db:
+    image: mariadb:10.5
+    restart: unless-stopped
+    container_name: nextclouddb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     networks:
       - database
+    volumes:
+      - ${DOCKER_DIR}/nextcloud_mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_PASSWORD
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+
+  app:
+    image: nextcloud
+    restart: unless-stopped
+    container_name: nextcloud
     ports:
       - 8950:80
-    volumes:
-      - ${DOCKER_DIR}/nextcloud/app:/var/www/html
-    environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASS}
-      - POSTGRES_DATABASE=nextcloud
-      - POSTGRES_USER=postgres
-      - POSTGRES_HOST=postgres
-  postgres:
-    image: postgres
-    container_name: postgres
-    restart: always
+    links:
+      - db
     networks:
       - database
     volumes:
-      - ${DOCKER_DIR}/nextcloud/postgresql:/var/lib/postgresql/data
+      - ${DOCKER_DIR}/nextcloud:/var/www/html
     environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASS}
+      - MYSQL_PASSWORD
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=db
 networks:
   database:
     external:
