@@ -11,37 +11,37 @@ services:
       - traefik_proxy
     command:
       # Globals
-      - "--log.level=ERROR"
-      - "--global.sendAnonymousUsage=false"
-      - "--api"
-      - "--api.insecure=true"
-      - "--accesslog=true"
-      - "--accessLog.filePath=/traefik.log"
-      - "--accessLog.bufferingSize=100" # Configuring a buffer of 100 lines
-      - "--accessLog.filters.statusCodes=400-499"
+      - --log.level=ERROR
+      - --global.sendAnonymousUsage=false
+      - --api
+      - --api.insecure=true
+      - --accesslog=true
+      - --accessLog.filePath=/traefik.log
+      - --accessLog.bufferingSize=100 # Configuring a buffer of 100 lines
+      - --accessLog.filters.statusCodes=400-499
       # Entrypoints
-      - "--entryPoints.http.address=:80"
-      - "--entryPoints.https.address=:443"
+      - --entryPoints.http.address=:80
+      - --entryPoints.https.address=:443
       # Docker
-      - "--providers.docker=true"
-      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
-      - "--providers.docker.defaultrule=Host(`{{ index .Labels "com.docker.compose.service" }}.$DOMAIN_NAME`)"
-      - "--providers.docker.exposedByDefault=false"
-      - "--providers.docker.network=traefik_proxy"
-      - "--providers.docker.swarmMode=false"
+      - --providers.docker=true
+      - --providers.docker.endpoint=unix:///var/run/docker.sock
+      - --providers.docker.defaultrule=Host(`{{ index .Labels "com.docker.compose.service" }}.$DOMAIN_NAME`)
+      - --providers.docker.exposedByDefault=false
+      - --providers.docker.network=traefik_proxy
+      - --providers.docker.swarmMode=false
       # File provider
-      - "--providers.file.directory=/etc/traefik/rules"
-      - "--providers.file.watch=true"
+      - --providers.file.directory=/etc/traefik/rules
+      - --providers.file.watch=true
       # LetsEncrypt
       # - --certificatesResolvers.mydnschallenge.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
-      - "--certificatesresolvers.mydnschallenge.acme.email=${CLOUDFLARE_EMAIL}"
-      - "--certificatesresolvers.mydnschallenge.acme.dnschallenge.provider=cloudflare"    
-      - "--certificatesresolvers.mydnschallenge.acme.storage=/etc/traefik/acme.json"      
-      - "--certificatesresolvers.mydnschallenge.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
-      - "--serversTransport.insecureSkipVerify=true"
+      - --certificatesresolvers.mydnschallenge.acme.email=${CLOUDFLARE_EMAIL}
+      - --certificatesresolvers.mydnschallenge.acme.dnschallenge.provider=cloudflare    
+      - --certificatesresolvers.mydnschallenge.acme.storage=/etc/traefik/acme.json      
+      - --certificatesresolvers.mydnschallenge.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53
+      - --serversTransport.insecureSkipVerify=true
     ports:
-      - "30080:80"
-      - "30443:443"
+      - 30080:80
+      - 30443:443
     environment:
       - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
       - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
@@ -49,30 +49,29 @@ services:
       - CLOUDFLARE_PROPAGATION_TIMEOUT=100
       - CLOUDFLARE_HTTP_TIMEOUT=60
     volumes:
-      - "${DOCKER_DIR}/traefik/acme.json:/etc/traefik/acme.json"
-      - "${DOCKER_DIR}/traefik/rules:/etc/traefik/rules"
-      - "${DOCKER_DIR}/traefik/traefik.log:/traefik.log"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - ${DOCKER_DIR}/traefik/acme.json:/etc/traefik/acme.json
+      - ${DOCKER_DIR}/traefik/rules:/etc/traefik/rules
+      - ${DOCKER_DIR}/traefik/traefik.log:/traefik.log
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     labels:
       # API
-      - "traefik.enable=true"
-      - "traefik.http.routers.traefikui.entrypoints=https"
-      - "traefik.http.routers.traefikui.middlewares=traefikui-whitelist"
-      - "traefik.http.routers.traefikui.rule=Host(`traefik.${DOMAIN_NAME}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
-      - "traefik.http.routers.traefikui.tls.options=default"
-      - "traefik.http.routers.traefikui.service=api@internal"
-      - "traefik.docker.network=traefik_proxy"
-      - "traefik.http.middlewares.traefikui-whitelist.ipwhitelist.sourcerange=${IP_WHITELIST}"
+      - traefik.enable=true
+      - traefik.http.routers.traefikui.entrypoints=https
+      - traefik.http.routers.traefikui.middlewares=oauth@file
+      - traefik.http.routers.traefikui.rule=Host(`traefik.${DOMAIN_NAME}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+      - traefik.http.routers.traefikui.tls.options=default
+      - traefik.http.routers.traefikui.service=api@internal
+      - traefik.docker.network=traefik_proxy
       # Wildcard cert
-      - "traefik.http.routers.traefik.tls=true"
-      - "traefik.http.routers.traefik.tls.certresolver=mydnschallenge"
-      - "traefik.http.routers.traefik.tls.domains[0].main=${DOMAIN_NAME}"
-      - "traefik.http.routers.traefik.tls.domains[0].sans=*.${DOMAIN_NAME}"
+      - traefik.http.routers.traefik.tls=true
+      - traefik.http.routers.traefik.tls.certresolver=mydnschallenge
+      - traefik.http.routers.traefik.tls.domains[0].main=${DOMAIN_NAME}
+      - traefik.http.routers.traefik.tls.domains[0].sans=*.${DOMAIN_NAME}
       # Global http-->https
-      - "traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)"
-      - "traefik.http.routers.http-catchall.entrypoints=http"
-      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)
+      - traefik.http.routers.http-catchall.entrypoints=http
+      - traefik.http.routers.http-catchall.middlewares=redirect-to-https
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
 networks:
   traefik_proxy:
     external: true
