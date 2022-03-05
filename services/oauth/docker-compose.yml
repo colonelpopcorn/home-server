@@ -30,6 +30,37 @@ services:
       - "traefik.http.routers.oauth.service=oauth"
       - "traefik.http.services.oauth.loadbalancer.server.port=4181"
       - "traefik.http.routers.oauth.middlewares=oauth@file"
+  admin-oauth:
+    container_name: admin-oauth
+    image: thomseddon/traefik-forward-auth:latest
+    restart: unless-stopped
+    networks: 
+      - traefik_proxy
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - PROVIDERS_OIDC_CLIENT_ID=${TRAEFIK_CLIENT_ID}
+      - PROVIDERS_OIDC_CLIENT_SECRET=${TRAEFIK_CLIENT_SECRET}
+      - PROVIDERS_OIDC_ISSUER_URL=https://auth.${DOMAIN_NAME}/auth/realms/${REALM_NAME}
+      - COOKIE_DOMAIN=${DOMAIN_NAME}
+      - SECRET=foobar
+      - INSECURE_COOKIE=true
+      - AUTH_HOST=admin-oauth.${DOMAIN_NAME}
+      - URL_PATH=/_oauth
+      - LOG_LEVEL=info
+      - LOG_FORMAT=text
+      - LIFETIME=2592000
+      - DEFAULT_PROVIDER=oidc
+      - WHITELIST=${ADMIN_WHITELIST}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.http.routers.admin-oauth.tls=true"
+      - "traefik.http.routers.admin-oauth.entrypoints=https"
+      - "traefik.http.routers.admin-oauth.rule=Host(`admin-oauth.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.admin-oauth.service=admin-oauth"
+      - "traefik.http.services.admin-oauth.loadbalancer.server.port=4181"
+      - "traefik.http.routers.admin-oauth.middlewares=admin-oauth@file"
 networks:
   traefik_proxy:
     external:

@@ -4,7 +4,7 @@ services:
     hostname: traefik
     image: traefik:v2.4
     container_name: traefik
-    restart: always
+    restart: unless-stopped
     domainname: ${DOMAIN_NAME}
     networks:
       - default
@@ -72,6 +72,26 @@ services:
       - traefik.http.routers.http-catchall.entrypoints=http
       - traefik.http.routers.http-catchall.middlewares=redirect-to-https
       - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+  ingress-editor:
+    hostname: ingress-editor
+    image: pldubouilh/gossa
+    container_name: ingress-editor
+    restart: unless-stopped
+    domainname: ingress-editor.${DOMAIN_NAME}
+    networks:
+      - default
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ingress-editor.entrypoints=https"
+      - "traefik.http.routers.ingress-editor.tls=true"
+      - "traefik.http.routers.ingress-editor.rule=Host(`ingress-editor.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.ingress-editor.middlewares=admin-oauth@file"
+      - "traefik.http.services.ingress-editor.loadbalancer.server.port=8080"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - ${DOCKER_DIR}/traefik/rules:/shared
+
 networks:
   traefik_proxy:
     external: true

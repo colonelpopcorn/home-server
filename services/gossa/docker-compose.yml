@@ -1,6 +1,6 @@
 version: '3'
 services:
-  pyload:
+  gossa:
     image: pldubouilh/gossa
     container_name: gossa
     environment:
