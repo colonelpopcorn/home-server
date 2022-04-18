@@ -1,27 +1,25 @@
-version: "2"
+version: "3"
 services:
   #region huginn - iftt thingy
   huginn:
     image: huginn/huginn
-    restart: always
+    container_name: huginn
+    restart: unless-stopped
     networks:
-      - traefik_proxy
-    labels:
-      - "traefik.enable=true"
-      - "traefik.backend=huginn"
-      - "traefik.frontend.rule=Host:huginn.${DOMAIN_NAME}"
-      - "traefik.port=3000"
-      - "traefik.docker.network=traefik_proxy"
+      - database
     environment:
-      - HUGINN_DATABASE_NAME=huginn
-      - HUGINN_DATABASE_USERNAME=huginn
-      - HUGINN_DATABASE_PASSWORD=${HUGINN_DB_PASS}
-      - HUGINN_DATABASE_HOST=${HUGINN_DB_HOST}
-      - HUGINN_DATABASE_PORT=3306
+      - DATABASE_ADAPTER=postgresql
+      - DATABASE_RECONNECT=true
+      - DATABASE_NAME=postgres
+      - DATABASE_USERNAME=huginn
+      - DATABASE_PASSWORD=${HUGINN_DB_PASS}
+      - DATABASE_HOST=${HUGINN_DB_HOST}
+      - DATABASE_PORT=5432
+      - DO_NOT_CREATE_DATABASE=1
+    ports:
+      - "3000:3000"
   #endregion
 networks:
-  traefik_proxy:
+  database:
     external:
-      name: traefik_proxy
-  default:
-    driver: bridge
+      name: database
