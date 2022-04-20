@@ -1,0 +1,17 @@
+---
+version: "3"
+services:
+  jackett:
+    image: lscr.io/linuxserver/jackett
+    container_name: jackett
+    environment:
+      - PUID
+      - PGID
+      - TZ
+      - AUTO_UPDATE=true #optional
+    volumes:
+      - ${DOCKER_WORK_DIR}/jackett:/config
+      - ${DOCKER_INGEST_DIR}/transmission-vpn/completed:/downloads
+    ports:
+      - 9117:9117
+    restart: unless-stopped

@@ -1,0 +1,15 @@
+# Ombi – Accept Requests for your Media Server
+version: "3"
+services:
+  ombi:
+    image: lscr.io/linuxserver/ombi
+    container_name: ombi
+    restart: unless-stopped
+    volumes:
+      - ${DOCKER_DIR}/ombi:/config
+    ports:
+      - "13579:3579"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}

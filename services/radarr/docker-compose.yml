@@ -1,0 +1,17 @@
+version: "3"
+services:
+  radarr:
+    image: lscr.io/linuxserver/radarr
+    container_name: radarr
+    restart: unless-stopped
+    environment:
+      - UMASK_SET=022 # control permissions of files and directories created by Radarr
+      - TZ=${TZ} # Specify a timezone to use EG Europe/London, this is required for Radarr
+      - PUID=${PUID} # for UserID
+      - PGID=${PGID} # for GroupID
+    volumes:
+      - ${DOCKER_DIR_INGEST}:/downloads # Location of download managers output directory (See note in Application setup)
+      - ${DOCKER_DIR_MEDIA}:/movies # Location of Movie library on disk (See note in Application setup)
+      - ${DOCKER_DIR_WORK}:/config # Database and Radarr configs
+    ports:
+      - 17878:7878

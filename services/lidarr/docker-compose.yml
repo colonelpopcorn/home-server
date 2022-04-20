@@ -1,0 +1,17 @@
+---
+version: "3"
+services:
+  lidarr:
+    image: lscr.io/linuxserver/lidarr
+    container_name: lidarr
+    restart: unless-stopped
+    environment:
+      - PUID
+      - PGID
+      - TZ
+    volumes:
+      - ${DOCKER_WORK_DIR}/lidarr:/config
+      - ${DOCKER_INGEST_DIR}/transmission-vpn:/data
+      - ${DOCKER_MEDIA_DIR}/Music:/music
+    ports:
+      - 18686:8686

@@ -1,0 +1,16 @@
+version: '3'
+services:
+  sonarr:
+    image: lscr.io/linuxserver/sonarr
+    container_name: sonarr
+    restart: unless-stopped
+    volumes:
+      - ${DOCKER_WORK_DIR}/sonarr:/config
+      - ${DOCKER_INGEST_DIR}/transmission-vpn:/data
+      - ${DOCKER_MEDIA_DIR}/Television:/tv
+    ports:
+      - "18989:8989"
+    environment:
+      - PUID
+      - PGID
+      - TZ

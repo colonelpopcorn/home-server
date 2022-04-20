@@ -1,0 +1,13 @@
+version: '3'
+services:
+  mylar:
+    image: lscr.io/linuxserver/mylar
+    restart: unless-stopped
+    volumes:
+      - ${DOCKER_WORK_DIR}/mylar:/config
+      - ${DOCKER_MEDIA_DIR}/Comics:/comics
+      - ${DOCKER_INGEST_DIR}/transmission-vpn:/data
+    environment:
+      - PUID
+      - PGID
+      - TZ

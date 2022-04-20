@@ -1,0 +1,14 @@
+version: '3'
+services:
+  lazylibrarian:
+    image: lscr.io/linuxserver/lazylibrarian
+    container_name: lazylibrarian
+    restart: unless-stopped
+    volumes:
+      - ${DOCKER_WORK_DIR}/lazylibrarian:/config
+      - ${DOCKER_INGEST_DIR}/transmission-vpn:/data
+      - ${DOCKER_MEDIA_DIR}/Books:/books
+    environment:
+      - PUID
+      - PGID
+      - TZ

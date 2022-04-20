@@ -2,9 +2,8 @@ version: '3'
 services:
   handbrake:
     container_name: handbrake
-    depends_on:
-      - handbrake-init
     image: jlesage/handbrake
+    restart: unless-stopped
     ports:
       - "5800:5800"
     environment:
@@ -12,12 +11,20 @@ services:
       - GROUP_ID=100
       - TZ=America/New_York
       - AUTOMATED_CONVERSION_PRESET=General/HQ 1080p30 Surround
-      - AUTOMATED_CONVERSION_PRESET_2=General/HQ 720p30 Surround
-      - AUTOMATED_CONVERSION_PRESET_3=General/HQ 1080p30 Surround
-      - AUTOMATED_CONVERSION_PRESET_4=General/HQ 720p30 Surround
+      - AUTOMATED_CONVERSION_KEEP_SOURCE=0
+      - AUTOMATED_CONVERSION_OUTPUT_DIR=/Movies
       - AUTOMATED_CONVERSION_OUTPUT_SUBDIR=SAME_AS_SRC
+      - AUTOMATED_CONVERSION_PRESET_2=General/HQ 720p30 Surround
+      - AUTOMATED_CONVERSION_KEEP_SOURCE_2=0
+      - AUTOMATED_CONVERSION_OUTPUT_DIR_2=/Movies
       - AUTOMATED_CONVERSION_OUTPUT_SUBDIR_2=SAME_AS_SRC
+      - AUTOMATED_CONVERSION_PRESET_3=General/HQ 1080p30 Surround
+      - AUTOMATED_CONVERSION_OUTPUT_DIR_3=/Television
+      - AUTOMATED_CONVERSION_KEEP_SOURCE_3=0
       - AUTOMATED_CONVERSION_OUTPUT_SUBDIR_3=SAME_AS_SRC
+      - AUTOMATED_CONVERSION_PRESET_4=General/HQ 720p30 Surround
+      - AUTOMATED_CONVERSION_OUTPUT_DIR_4=/Television
+      - AUTOMATED_CONVERSION_KEEP_SOURCE_4=0
       - AUTOMATED_CONVERSION_OUTPUT_SUBDIR_4=SAME_AS_SRC
     volumes:
       - "${DOCKER_DIR}/handbrake_appdata:/config:rw"
@@ -27,55 +34,62 @@ services:
       - "${DOCKER_DIR}/HandBrake/watch3:/watch3:rw"
       - "${DOCKER_DIR}/HandBrake/watch4:/watch4:rw"
       - "${DOCKER_DIR}/HandBrake/output:/output:rw"
-      - "${DOCKER_DIR}/gossa:/ingest:rw"
+      - "${DOCKER_DIR}/gossa/Movies:/Movies:rw"
+      - "${DOCKER_DIR}/gossa/Television:/Television:rw"
     labels:
       - "com.centurylinklabs.watchtower.monitor-only=true"
-  handbrake-init:
-    container_name: handbrake-init
-    restart: 'no'
-    image: alpine
-    volumes:
-      - "${DOCKER_DIR}/handbrake_appdata:/config:rw"
-    command: |
-      sh -c "echo > /config/post_conversion.sh << EOF
-      #!/bin/sh
-      #
-      # This is an example of a post-conversion hook.  This script is always invoked
-      # with /bin/sh (shebang ignored).
-      #
-      # The first parameter is the conversion status.  A value of 0 indicates that
-      # the video has been converted successfully.  Else, conversion failed.
-      #
-      # The second parameter is the full path to the converted video (the output).
-      #
-      # The third parameter is the full path to the source file.
-      #
-      # The fourth argument is the name of the HandBrake preset used to convert the
-      # video.
-      #
+  # Not necessary if AUTOMATED_CONVERSION vars work as expected.
+  # handbrake-init:
+  #   container_name: handbrake-init
+  #   restart: 'no'
+  #   image: alpine
+  #   volumes:
+  #     - "${DOCKER_DIR}/handbrake_appdata:/config:rw"
+  #   command: |
+  #     sh -c "echo > /config/post_conversion.sh << EOF
+  #     #!/bin/sh
+  #     #
+  #     # This is an example of a post-conversion hook.  This script is always invoked
+  #     # with /bin/sh (shebang ignored).
+  #     #
+  #     # The first parameter is the conversion status.  A value of 0 indicates that
+  #     # the video has been converted successfully.  Else, conversion failed.
+  #     #
+  #     # The second parameter is the full path to the converted video (the output).
+  #     #
+  #     # The third parameter is the full path to the source file.
+  #     #
+  #     # The fourth argument is the name of the HandBrake preset used to convert the
+  #     # video.
+  #     #
 
-      CONVERSION_STATUS=$1
-      CONVERTED_FILE="$2"
-      SOURCE_FILE="$3"
-      PRESET="$4"
+  #     CONVERSION_STATUS=$1
+  #     CONVERTED_FILE="$2"
+  #     SOURCE_FILE="$3"
+  #     PRESET="$4"
 
-      echo "post-conversion: Status = $CONVERSION_STATUS"
-      echo "post-conversion: Output File = $CONVERTED_FILE"
-      echo "post-conversion: Source File = $SOURCE_FILE"
-      echo "post-conversion: Preset = $PRESET"
+  #     echo "post-conversion: Status = $CONVERSION_STATUS"
+  #     echo "post-conversion: Output File = $CONVERTED_FILE"
+  #     echo "post-conversion: Source File = $SOURCE_FILE"
+  #     echo "post-conversion: Preset = $PRESET"
 
-      if [ "$CONVERSION_STATUS" -eq 0 ]; then
-          # Successful conversion.
-          rm -rf $(dirname "$SOURCE_FILE")
-          if [ "$SOURCE_FILE" == *"watch4"* ] || [ "$SOURCE_FILE" == *"watch3"*]; then
-            mv $(dirname "$CONVERTED_FILE") /ingest/Televison
-          else
-            mv $(dirname "$CONVERTED_FILE") /ingest/Movies
-          fi
-      else
-          # Failed conversion.
+  #     if [ "$CONVERSION_STATUS" -eq 0 ]; then
+  #         # Successful conversion.
+  #         # rm -rf $(dirname "$SOURCE_FILE")
+  #         echo $(dirname "$SOURCE_FILE")
+  #         if [ "$SOURCE_FILE" == *"watch4"* ] || [ "$SOURCE_FILE" == *"watch3"*]; then
+  #           # mv $(dirname "$CONVERTED_FILE") /ingest/Televison
+  #           echo "is television"
+  #           echo $(dirname "$CONVERTED_FILE")
+  #         else
+  #           # mv $(dirname "$CONVERTED_FILE") /ingest/Movies
+  #           echo "is movie"
+  #           echo $(dirname "$CONVERTED_FILE")
+  #         fi
+  #     else
+  #         # Failed conversion.
 
-          # TODO: Do something useful.
-          :
-      fi
+  #         # TODO: Do something useful.
+  #         :
+  #     fi
 
