@@ -1,0 +1,17 @@
+#Reference: https://www.smarthomebeginner.com/docker-home-media-server-2018-basic
+#Requirement: Set environment variables: USERDIR, PUID, PGID, TRAEFIK_HTTP_PORT, TRAEFIK_HTTPS_PORT, TRAEFIK_UI_PORT, and TZ as explained in the reference.
+version: '3'
+services:
+  tautulli:
+    image: lscr.io/linuxserver/tautulli
+    container_name: tautulli
+    restart: unless-stopped
+    ports:
+    - 18181:8181
+    volumes:
+      - ${DOCKER_WORK_DIR}/tautulli/config:/config
+      - ${DOCKER_WORK_DIR}/tautulli/logs:/logs:ro
+    environment:
+      - PUID
+      - PGID
+      - TZ

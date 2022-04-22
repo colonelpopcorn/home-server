@@ -1,0 +1,11 @@
+version: "3"
+services:
+  nocodb:
+    image: nocodb/nocodb:latest
+    container_name: nocodb
+    restart: unless-stopped
+    ports:
+      - "5525:8080"
+    environment:
+      - NC_DB=pg://${PGSQL_DB_HOST}:${PGSQL_DB_PORT}?u=${PGSQL_DB_USER}&p=${PGSQL_DB_PASS}&d=${PGSQL_DB_NAME}
+      - NC_AUTH_JWT_SECRET=${JWT_GUID}"
