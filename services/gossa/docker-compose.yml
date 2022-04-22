@@ -4,9 +4,9 @@ services:
     image: pldubouilh/gossa
     container_name: gossa
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/New_York
+      - PUID
+      - PGID
+      - TZ
     volumes:
       - ${DOCKER_DIR}:/shared
     ports:
