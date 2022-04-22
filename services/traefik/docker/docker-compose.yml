@@ -81,6 +81,10 @@ services:
     networks:
       - default
       - traefik_proxy
+    environment:
+      - PUID
+      - PGID
+      - TZ
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.ingress-editor.entrypoints=https"
