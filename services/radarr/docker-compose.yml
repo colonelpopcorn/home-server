@@ -1,7 +1,7 @@
 version: "3"
 services:
   radarr:
-    image: lscr.io/linuxserver/radarr
+    image: linuxserver/radarr
     container_name: radarr
     restart: unless-stopped
     environment:
@@ -10,8 +10,8 @@ services:
       - PUID=${PUID} # for UserID
       - PGID=${PGID} # for GroupID
     volumes:
-      - ${DOCKER_DIR_INGEST}:/downloads # Location of download managers output directory (See note in Application setup)
-      - ${DOCKER_DIR_MEDIA}:/movies # Location of Movie library on disk (See note in Application setup)
-      - ${DOCKER_DIR_WORK}:/config # Database and Radarr configs
+      - ${DOCKER_DIR_INGEST}/completed:/data/completed # Location of download managers output directory (See note in Application setup)
+      - ${DOCKER_DIR_MEDIA}/Movies:/movies # Location of Movie library on disk (See note in Application setup)
+      - ${DOCKER_DIR_WORK}/radarr:/config # Database and Radarr configs
     ports:
       - 17878:7878

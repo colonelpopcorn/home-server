@@ -1,12 +1,15 @@
 version: '3'
 services:
   mylar:
-    image: lscr.io/linuxserver/mylar
+    image: lscr.io/linuxserver/mylar3
+    container_name: mylar3
     restart: unless-stopped
+    ports:
+      - 18090:8090
     volumes:
       - ${DOCKER_WORK_DIR}/mylar:/config
       - ${DOCKER_MEDIA_DIR}/Comics:/comics
-      - ${DOCKER_INGEST_DIR}/transmission-vpn:/data
+      - ${DOCKER_INGEST_DIR}/completed:/data
     environment:
       - PUID
       - PGID
