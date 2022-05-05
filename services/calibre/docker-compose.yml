@@ -1,19 +1,5 @@
 version: "3"
 services:
-  calibre:
-    image: lscr.io/linuxserver/calibre
-    container_name: calibre
-    environment:
-      - PUID
-      - PGID
-      - TZ
-      - PASSWORD=${CALIBRE_PASS} #optional
-      # - CLI_ARGS= #optional
-    volumes:
-      - ${DOCKER_DIR}/calibre:/config
-    ports:
-      - 6080:8080
-    restart: unless-stopped
   calibre-web:
     image: lscr.io/linuxserver/calibre-web
     container_name: calibre-web
@@ -21,11 +7,10 @@ services:
       - PUID
       - PGID
       - TZ
-      # - DOCKER_MODS=linuxserver/calibre-web:calibre #optional
-      # - OAUTHLIB_RELAX_TOKEN_SCOPE=1 #optional
+      - DOCKER_MODS=linuxserver/calibre-web:calibre #optional
     volumes:
-      - ${DOCKER_DIR}/calibre-web:/config
-      - ${DOCKER_DIR}/calibre:/books
+      - ${DOCKER_WORK_DIR}/calibre-web:/config
+      - ${DOCKER_MEDIA_DIR}/calibre:/books
     ports:
-      - 6083:8083
+      - 18083:8083
     restart: unless-stopped
