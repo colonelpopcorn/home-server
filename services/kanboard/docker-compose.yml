@@ -1,0 +1,13 @@
+version: '3'
+services:
+  kanboard:
+    container_name: kanboard
+    restart: unless-stopped
+    image: kanboard/kanboard:latest
+    ports:
+     - "13080:80"
+     - "13443:443"
+    volumes:
+     - ${DOCKER_DIR}/kanboard/data:/var/www/app/data
+     - ${DOCKER_DIR}/kanboard/plugins:/var/www/app/plugins
+     - ${DOCKER_DIR}/kanboard/ssl:/etc/nginx/ssl
