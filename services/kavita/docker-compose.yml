@@ -1,0 +1,13 @@
+version: '3'
+services:
+  kavita:
+      image: kizaing/kavita:latest
+      container_name: kavita
+      volumes:
+          - ${DOCKER_MEDIA_DIR}/Comics:/comics
+          - ${DOCKER_MEDIA_DIR}/Manga:/manga
+          - ${DOCKER_MEDIA_DIR}/Books:/books
+          - ${DOCKER_WORK_DIR}/kavita/data:/kavita/config
+      ports:
+          - "15000:5000"
+      restart: unless-stopped
