@@ -1,0 +1,9 @@
+version: '3'
+services:
+  hbdownloader:
+    image: hbdownloader
+    container_name: hbdownloader
+    restart: never
+    volumes:
+      - ${DOCKER_DIR}/hb-downloader/config:/config
+      - ${DOCKER_DIR}/hb-downloader/output:/output
