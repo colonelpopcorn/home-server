@@ -1,0 +1,11 @@
+version: '3'
+services:
+  nifi:
+    image: apache/nifi
+    container_name: nifi
+    restart: always
+    environment:
+      - SINGLE_USER_CREDENTIALS_USERNAME=webmaster
+      - SINGLE_USER_CREDENTIALS_PASSWORD=SomePassMakesC@shMoney
+    ports:
+      - 8443:8443
