@@ -1,0 +1,29 @@
+version: '3'
+services:
+  node-red:
+    image: nodered/node-red:latest-minimal
+    container_name: node-red
+    user: root
+    networks:
+      - traefik_proxy
+    volumes:
+      - "${DOCKER_DIR}/node-red:/data"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.node-red.entrypoints=https"
+      - "traefik.http.routers.node-red.tls=true"
+      - "traefik.http.routers.node-red.rule=Host(`nodes.${DOMAIN_NAME}`)"
+      - "traefik.http.services.node-red.loadbalancer.server.port=1880"
+      - "traefik.http.middlewares.node-red-whitelist.ipwhitelist.sourcerange=${IP_WHITELIST}"
+      - "traefik.http.routers.node-red.middlewares=node-red-whitelist"
+      # - "traefik.http.routers.public-api.entrypoints=https"
+      # - "traefik.http.routers.public-api.tls=true"
+      # - "traefik.http.routers.public-api.rule=Host(`api.${DOMAIN_NAME}`)"
+      # - "traefik.http.routers.public-api.service=node-red"
+      # - "traefik.http.middlewares.public-api-prefix.addprefix.prefix=/api/partition"
+      # - "traefik.http.routers.public-api.middlewares=public-api-prefix"
+      - "traefik.docker.network=traefik_proxy"
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy

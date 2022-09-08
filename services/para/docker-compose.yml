@@ -1,0 +1,14 @@
+# docker run -ti -p 8080:8080 --rm -v $(pwd)/data:/para/data \
+#   -v $(pwd)/application.conf:/para/application.conf \
+#   -e JAVA_OPTS="-Dconfig.file=/para/application.conf" erudikaltd/para:latest_stable
+version: '3'
+services:
+  para:
+    image: erudikaltd/para:latest_stable
+    container_name: para
+    ports:
+      - 28080:8080
+    environment:
+      - JAVA_OPTS=-Dconfig.file=/para/application.conf
+    volumes:
+      - ${DOCKER_DIR}/para:/para

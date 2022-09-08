@@ -1,0 +1,32 @@
+version: '3'
+services:
+  etcd:
+    image: bitnami/etcd:3.4.9
+    container_name: etcd-server
+    networks:
+     - default
+    environment:
+      - "ALLOW_NONE_AUTHENTICATION=yes"
+    volumes:
+      - ${DOCKER_DIR}/apisix/etcd/etcd.conf.yml:/opt/bitnami/etcd/conf/etcd.conf.yml
+  apisix:
+    image: apache/apisix
+    container_name: apisix
+    networks:
+      - default
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.apisix.entrypoints=https"
+      - "traefik.http.routers.apisix.tls=true"
+      - "traefik.http.routers.apisix.rule=Host(`api.${DOMAIN_NAME}`)"
+      - "traefik.http.services.apisix.loadbalancer.server.port=9080"
+      - "traefik.http.middlewares.api-test-whitelist.ipwhitelist.sourcerange=${IP_WHITELIST}"
+      - "traefik.docker.network=traefik_proxy"
+    volumes:
+      - ${DOCKER_DIR}/apisix/main/apisix_conf/config.yaml:/usr/local/apisix/conf/config.yaml
+      - ${DOCKER_DIR}/apisix/main/apisix_log:/usr/local/apisix/logs
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
